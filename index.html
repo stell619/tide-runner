@@ -1,0 +1,2075 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TIDE RUNNER // Sydney Fishing</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ocean:    #020c18;
+  --deep:     #041225;
+  --mid:      #062040;
+  --surface:  #0a2d52;
+  --glass:    rgba(6,32,64,0.7);
+  --border:   rgba(0,180,220,0.12);
+  --border2:  rgba(0,180,220,0.25);
+  --cyan:     #00d4ff;
+  --teal:     #00ffc8;
+  --gold:     #ffd060;
+  --coral:    #ff6b6b;
+  --purple:   #b388ff;
+  --text:     #b8d4e8;
+  --bright:   #e8f4ff;
+  --dim:      #4a6a8a;
+  --glow:     0 0 30px rgba(0,212,255,0.15);
+  --glow2:    0 0 60px rgba(0,212,255,0.25);
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+
+body {
+  background: var(--ocean);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Animated ocean background */
+body::before {
+  content:'';
+  position:fixed;
+  inset:0;
+  background:
+    radial-gradient(ellipse at 15% 85%, rgba(0,100,180,0.08) 0%, transparent 45%),
+    radial-gradient(ellipse at 85% 15%, rgba(0,212,255,0.05) 0%, transparent 45%),
+    radial-gradient(ellipse at 50% 50%, rgba(0,50,100,0.1) 0%, transparent 70%);
+  pointer-events:none;
+  z-index:0;
+}
+
+/* Bioluminescent particle dots */
+body::after {
+  content:'';
+  position:fixed;
+  inset:0;
+  background-image:
+    radial-gradient(1px 1px at 20% 30%, rgba(0,212,255,0.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 80% 70%, rgba(0,255,200,0.3) 0%, transparent 100%),
+    radial-gradient(1px 1px at 40% 80%, rgba(0,212,255,0.2) 0%, transparent 100%),
+    radial-gradient(1px 1px at 60% 20%, rgba(0,255,200,0.2) 0%, transparent 100%),
+    radial-gradient(1px 1px at 10% 60%, rgba(0,212,255,0.15) 0%, transparent 100%),
+    radial-gradient(1px 1px at 90% 40%, rgba(0,255,200,0.15) 0%, transparent 100%);
+  pointer-events:none;
+  z-index:0;
+  animation: drift 20s ease-in-out infinite alternate;
+}
+
+@keyframes drift {
+  from { transform: translate(0,0); }
+  to   { transform: translate(8px, -12px); }
+}
+
+/* ── HEADER ── */
+header {
+  position:sticky;
+  top:0;
+  z-index:100;
+  background: rgba(2,12,24,0.92);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border2);
+  padding: 0 32px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+
+.logo-mark {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:26px;
+  letter-spacing:3px;
+  color:var(--cyan);
+  text-shadow: 0 0 20px rgba(0,212,255,0.5);
+  line-height:1;
+}
+
+.logo-sub {
+  font-family:'DM Mono',monospace;
+  font-size:9px;
+  letter-spacing:3px;
+  color:var(--dim);
+  text-transform:uppercase;
+  margin-top:2px;
+}
+
+.wave-divider {
+  width:1px;
+  height:30px;
+  background:var(--border2);
+}
+
+.score-header {
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.score-big {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:38px;
+  line-height:1;
+  color:var(--teal);
+  text-shadow:0 0 20px rgba(0,255,200,0.4);
+  transition: color 0.5s;
+}
+
+.score-label {
+  font-size:10px;
+  letter-spacing:3px;
+  color:var(--dim);
+  text-transform:uppercase;
+}
+
+nav {
+  display:flex;
+  gap:4px;
+}
+
+.nav-btn {
+  padding:8px 18px;
+  border-radius:6px;
+  border:none;
+  background:transparent;
+  color:var(--dim);
+  font-family:'DM Mono',monospace;
+  font-size:11px;
+  letter-spacing:2px;
+  cursor:pointer;
+  transition:all 0.2s;
+  text-transform:uppercase;
+}
+
+.nav-btn:hover { color:var(--cyan); background:rgba(0,212,255,0.06); }
+.nav-btn.active { color:var(--cyan); background:rgba(0,212,255,0.1); border:1px solid rgba(0,212,255,0.2); }
+
+.time-display {
+  font-family:'DM Mono',monospace;
+  font-size:13px;
+  color:var(--cyan);
+  opacity:0.7;
+}
+
+/* ── PAGES ── */
+.page { display:none; padding:28px 32px; max-width:1400px; margin:0 auto; position:relative; z-index:1; }
+.page.active { display:block; animation: fadeUp 0.4s ease forwards; }
+
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(12px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+/* ── CARDS ── */
+.card {
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius:12px;
+  backdrop-filter:blur(10px);
+  overflow:hidden;
+  transition: border-color 0.3s;
+}
+.card:hover { border-color: var(--border2); }
+
+.card-header {
+  padding:14px 18px;
+  border-bottom:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  background:rgba(0,0,0,0.2);
+}
+
+.card-title {
+  font-family:'DM Mono',monospace;
+  font-size:10px;
+  letter-spacing:3px;
+  color:var(--cyan);
+  text-transform:uppercase;
+}
+
+.card-badge {
+  font-family:'DM Mono',monospace;
+  font-size:10px;
+  padding:3px 10px;
+  border-radius:20px;
+  background:rgba(0,212,255,0.08);
+  color:var(--cyan);
+  border:1px solid rgba(0,212,255,0.15);
+}
+
+.card-body { padding:18px; }
+
+/* ── GRIDS ── */
+.grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:14px; }
+.grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:14px; }
+.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; }
+.grid-auto { display:grid; grid-template-columns:2fr 1fr; gap:14px; margin-bottom:14px; }
+.grid-3-1 { display:grid; grid-template-columns:3fr 1fr; gap:14px; margin-bottom:14px; }
+
+/* ── STAT BOXES ── */
+.stat-box {
+  background:var(--glass);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:18px;
+  position:relative;
+  overflow:hidden;
+}
+
+.stat-box::before {
+  content:'';
+  position:absolute;
+  top:0; left:0; right:0;
+  height:2px;
+  background:linear-gradient(90deg, var(--cyan), var(--teal));
+  opacity:0.5;
+}
+
+.stat-label {
+  font-family:'DM Mono',monospace;
+  font-size:9px;
+  letter-spacing:3px;
+  color:var(--dim);
+  text-transform:uppercase;
+  margin-bottom:10px;
+}
+
+.stat-value {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:32px;
+  line-height:1;
+  color:var(--bright);
+  margin-bottom:4px;
+}
+
+.stat-sub {
+  font-family:'DM Mono',monospace;
+  font-size:10px;
+  color:var(--dim);
+}
+
+/* ── SCORE RING ── */
+.score-ring-wrap {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+
+.score-ring {
+  position:relative;
+  width:140px;
+  height:140px;
+}
+
+.score-ring svg { transform:rotate(-90deg); }
+
+.score-inner {
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+}
+
+.score-num {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:48px;
+  line-height:1;
+  color:var(--bright);
+}
+
+.score-lbl {
+  font-family:'DM Mono',monospace;
+  font-size:9px;
+  letter-spacing:3px;
+  color:var(--cyan);
+  margin-top:2px;
+}
+
+/* ── TIDE GAUGE ── */
+.tide-gauge-wrap {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+  padding:16px;
+}
+
+.tide-gauge {
+  width:40px;
+  height:120px;
+  background:rgba(0,0,0,0.4);
+  border:1px solid var(--border2);
+  border-radius:20px;
+  position:relative;
+  overflow:hidden;
+}
+
+.tide-fill {
+  position:absolute;
+  bottom:0;
+  left:0;
+  right:0;
+  background:linear-gradient(0deg, rgba(0,100,180,0.8), rgba(0,212,255,0.4));
+  transition: height 2s ease;
+  border-radius:0 0 20px 20px;
+}
+
+.tide-label {
+  font-family:'DM Mono',monospace;
+  font-size:11px;
+  color:var(--cyan);
+  text-align:center;
+}
+
+/* ── CONDITIONS ROW ── */
+.cond-item {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:10px 0;
+  border-bottom:1px solid var(--border);
+}
+.cond-item:last-child { border-bottom:none; }
+
+.cond-label {
+  font-family:'DM Mono',monospace;
+  font-size:10px;
+  letter-spacing:2px;
+  color:var(--dim);
+  text-transform:uppercase;
+  min-width:100px;
+}
+
+.cond-value {
+  font-size:14px;
+  font-weight:600;
+  color:var(--bright);
+}
+
+.cond-badge {
+  font-family:'DM Mono',monospace;
+  font-size:10px;
+  padding:2px 8px;
+  border-radius:4px;
+  letter-spacing:1px;
+}
+
+.badge-good  { background:rgba(0,255,200,0.1); color:var(--teal); border:1px solid rgba(0,255,200,0.2); }
+.badge-warn  { background:rgba(255,208,96,0.1); color:var(--gold); border:1px solid rgba(255,208,96,0.2); }
+.badge-bad   { background:rgba(255,107,107,0.1); color:var(--coral); border:1px solid rgba(255,107,107,0.2); }
+.badge-info  { background:rgba(0,212,255,0.1); color:var(--cyan); border:1px solid rgba(0,212,255,0.2); }
+
+/* ── SPECIES CARDS ── */
+.species-card {
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:16px;
+  background:var(--glass);
+  cursor:pointer;
+  transition:all 0.2s;
+  position:relative;
+  overflow:hidden;
+}
+
+.species-card:hover {
+  border-color:var(--border2);
+  transform:translateY(-2px);
+}
+
+.species-card::before {
+  content:'';
+  position:absolute;
+  top:0; left:0; right:0;
+  height:3px;
+  opacity:0.7;
+}
+
+.species-name {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:22px;
+  letter-spacing:1px;
+  margin-bottom:4px;
+}
+
+.species-score-bar {
+  height:4px;
+  background:rgba(0,0,0,0.4);
+  border-radius:2px;
+  margin:10px 0 8px;
+  overflow:hidden;
+}
+
+.species-score-fill {
+  height:100%;
+  border-radius:2px;
+  transition:width 1s ease;
+}
+
+/* ── 7 DAY TABS ── */
+.day-tabs {
+  display:flex;
+  gap:8px;
+  margin-bottom:16px;
+  overflow-x:auto;
+  padding-bottom:4px;
+}
+
+.day-tab {
+  min-width:100px;
+  padding:12px 14px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  cursor:pointer;
+  text-align:center;
+  transition:all 0.2s;
+  background:transparent;
+  color:var(--text);
+}
+
+.day-tab:hover { border-color:var(--border2); }
+.day-tab.active { border-color:var(--cyan); background:rgba(0,212,255,0.08); }
+
+.day-tab-label {
+  font-family:'DM Mono',monospace;
+  font-size:9px;
+  letter-spacing:2px;
+  color:var(--dim);
+  margin-bottom:6px;
+  text-transform:uppercase;
+}
+
+.day-tab-score {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:28px;
+  line-height:1;
+  margin-bottom:4px;
+}
+
+.day-tab-rating {
+  font-family:'DM Mono',monospace;
+  font-size:9px;
+  letter-spacing:1px;
+}
+
+/* ── SOLUNAR TABLE ── */
+.solunar-row {
+  display:flex;
+  align-items:center;
+  gap:16px;
+  padding:12px 0;
+  border-bottom:1px solid var(--border);
+}
+.solunar-row:last-child { border-bottom:none; }
+
+.solunar-time {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:24px;
+  color:var(--bright);
+  min-width:80px;
+}
+
+.solunar-type {
+  font-family:'DM Mono',monospace;
+  font-size:10px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  min-width:60px;
+}
+
+.solunar-bar {
+  flex:1;
+  height:6px;
+  background:rgba(0,0,0,0.4);
+  border-radius:3px;
+  overflow:hidden;
+}
+
+.solunar-fill-major {
+  height:100%;
+  background:linear-gradient(90deg, var(--gold), #ffaa00);
+  border-radius:3px;
+  width:80%;
+}
+
+.solunar-fill-minor {
+  height:100%;
+  background:linear-gradient(90deg, var(--cyan), var(--teal));
+  border-radius:3px;
+  width:50%;
+}
+
+/* ── TIDE GRAPH ── */
+canvas.tide-chart {
+  width:100%;
+  height:100px;
+  border-radius:6px;
+  display:block;
+}
+
+/* ── SPOTS MAP ── */
+.spots-grid {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+}
+
+.spot-card {
+  background:var(--glass);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:14px;
+  cursor:pointer;
+  transition:all 0.2s;
+}
+
+.spot-card:hover {
+  border-color:var(--border2);
+  transform:translateY(-2px);
+  box-shadow:var(--glow);
+}
+
+.spot-name {
+  font-weight:600;
+  color:var(--bright);
+  font-size:14px;
+  margin-bottom:3px;
+}
+
+.spot-area {
+  font-family:'DM Mono',monospace;
+  font-size:10px;
+  color:var(--cyan);
+  letter-spacing:1px;
+  margin-bottom:10px;
+}
+
+.spot-species {
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+  margin-bottom:10px;
+}
+
+.spot-species-tag {
+  font-size:11px;
+  padding:2px 8px;
+  border-radius:4px;
+  border:1px solid var(--border);
+  color:var(--text);
+}
+
+.spot-type-badge {
+  font-family:'DM Mono',monospace;
+  font-size:9px;
+  letter-spacing:1px;
+  padding:2px 8px;
+  border-radius:4px;
+  background:rgba(0,212,255,0.08);
+  color:var(--dim);
+  border:1px solid var(--border);
+  display:inline-block;
+  margin-bottom:8px;
+}
+
+.spot-tip {
+  font-size:11px;
+  color:var(--dim);
+  line-height:1.5;
+  border-top:1px solid var(--border);
+  padding-top:8px;
+  margin-top:4px;
+}
+
+/* ── CATCH LOG ── */
+.catch-form {
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr 1fr auto;
+  gap:10px;
+  align-items:end;
+  margin-bottom:20px;
+  padding:16px;
+  background:rgba(0,0,0,0.2);
+  border-radius:10px;
+  border:1px solid var(--border);
+}
+
+.form-group { display:flex; flex-direction:column; gap:6px; }
+
+.form-label {
+  font-family:'DM Mono',monospace;
+  font-size:9px;
+  letter-spacing:2px;
+  color:var(--dim);
+  text-transform:uppercase;
+}
+
+.form-input {
+  background:rgba(0,0,0,0.4);
+  border:1px solid var(--border2);
+  border-radius:6px;
+  padding:8px 12px;
+  color:var(--bright);
+  font-family:'DM Sans',sans-serif;
+  font-size:13px;
+  outline:none;
+  transition:border-color 0.2s;
+}
+
+.form-input:focus { border-color:var(--cyan); }
+.form-input option { background:#041225; }
+
+.btn-primary {
+  background:rgba(0,212,255,0.15);
+  border:1px solid rgba(0,212,255,0.3);
+  color:var(--cyan);
+  padding:9px 20px;
+  border-radius:6px;
+  font-family:'DM Mono',monospace;
+  font-size:11px;
+  letter-spacing:2px;
+  cursor:pointer;
+  transition:all 0.2s;
+  text-transform:uppercase;
+  white-space:nowrap;
+}
+
+.btn-primary:hover {
+  background:rgba(0,212,255,0.25);
+  box-shadow:var(--glow);
+}
+
+.catch-item {
+  display:grid;
+  grid-template-columns:2fr 1fr 1fr 1fr 1fr 40px;
+  gap:12px;
+  align-items:center;
+  padding:12px 0;
+  border-bottom:1px solid var(--border);
+}
+
+.catch-item:last-child { border-bottom:none; }
+
+.catch-species-name {
+  font-weight:600;
+  color:var(--bright);
+  font-size:14px;
+}
+
+.catch-detail {
+  font-family:'DM Mono',monospace;
+  font-size:11px;
+  color:var(--dim);
+}
+
+.btn-delete {
+  background:transparent;
+  border:none;
+  color:var(--dim);
+  cursor:pointer;
+  font-size:16px;
+  padding:4px;
+  border-radius:4px;
+  transition:color 0.2s;
+}
+
+.btn-delete:hover { color:var(--coral); }
+
+/* ── BITING NOW ── */
+.biting-item {
+  display:flex;
+  align-items:center;
+  gap:14px;
+  padding:12px 0;
+  border-bottom:1px solid var(--border);
+}
+.biting-item:last-child { border-bottom:none; }
+
+.biting-emoji { font-size:28px; }
+
+.biting-name {
+  font-weight:600;
+  color:var(--bright);
+  font-size:15px;
+}
+
+.biting-tip {
+  font-size:11px;
+  color:var(--dim);
+  margin-top:2px;
+}
+
+.biting-score {
+  margin-left:auto;
+  text-align:right;
+}
+
+.biting-score-num {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:28px;
+  color:var(--teal);
+  line-height:1;
+}
+
+/* ── NEXT TIDE ── */
+.next-tide-box {
+  text-align:center;
+  padding:20px;
+}
+
+.next-tide-countdown {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:52px;
+  line-height:1;
+  color:var(--cyan);
+  text-shadow:0 0 30px rgba(0,212,255,0.4);
+  letter-spacing:2px;
+}
+
+.next-tide-type {
+  font-family:'DM Mono',monospace;
+  font-size:11px;
+  letter-spacing:3px;
+  color:var(--dim);
+  text-transform:uppercase;
+  margin-top:6px;
+}
+
+/* ── PRESSURE INDICATOR ── */
+.pressure-wrap {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:12px 0;
+}
+
+.pressure-arrow {
+  font-size:24px;
+  transition:transform 0.5s;
+}
+
+.pressure-val {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:28px;
+  color:var(--bright);
+}
+
+.pressure-label {
+  font-family:'DM Mono',monospace;
+  font-size:10px;
+  color:var(--dim);
+  letter-spacing:1px;
+}
+
+/* ── WIND COMPASS ── */
+.compass-wrap {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:8px;
+  padding:12px 0;
+}
+
+.compass {
+  width:70px;
+  height:70px;
+  border:2px solid var(--border2);
+  border-radius:50%;
+  position:relative;
+  background:rgba(0,0,0,0.3);
+}
+
+.compass-needle {
+  position:absolute;
+  top:50%; left:50%;
+  width:3px;
+  height:28px;
+  background:linear-gradient(var(--coral) 50%, var(--dim) 50%);
+  transform-origin:50% 100%;
+  transform:translateX(-50%) translateY(-100%);
+  border-radius:2px;
+  transition:transform 1s ease;
+}
+
+.compass-dirs {
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.compass-n {
+  position:absolute;
+  top:4px;
+  font-family:'DM Mono',monospace;
+  font-size:9px;
+  color:var(--dim);
+}
+
+/* ── MOON DISPLAY ── */
+.moon-display {
+  display:flex;
+  align-items:center;
+  gap:14px;
+  padding:12px 0;
+}
+
+.moon-emoji-big { font-size:40px; }
+
+.moon-phase-bar {
+  flex:1;
+  height:6px;
+  background:rgba(0,0,0,0.4);
+  border-radius:3px;
+  overflow:hidden;
+  border:1px solid var(--border);
+}
+
+.moon-phase-fill {
+  height:100%;
+  background:linear-gradient(90deg, rgba(100,120,200,0.6), rgba(200,220,255,0.9));
+  border-radius:3px;
+  transition:width 1s ease;
+}
+
+/* ── STARS ── */
+.stars {
+  display:flex;
+  gap:3px;
+  color:var(--gold);
+  font-size:14px;
+}
+
+/* ── CATCH STATS ── */
+.catch-stat {
+  text-align:center;
+  padding:14px;
+  background:rgba(0,0,0,0.2);
+  border-radius:8px;
+  border:1px solid var(--border);
+}
+
+.catch-stat-num {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:36px;
+  color:var(--cyan);
+  line-height:1;
+}
+
+.catch-stat-label {
+  font-family:'DM Mono',monospace;
+  font-size:9px;
+  letter-spacing:2px;
+  color:var(--dim);
+  margin-top:4px;
+  text-transform:uppercase;
+}
+
+/* ── WAVE ANIMATION ── */
+@keyframes wave1 {
+  0%,100%{transform:translateX(0);}
+  50%{transform:translateX(-30px);}
+}
+@keyframes wave2 {
+  0%,100%{transform:translateX(0);}
+  50%{transform:translateX(30px);}
+}
+
+.wave-bg {
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  height:120px;
+  pointer-events:none;
+  z-index:0;
+  opacity:0.04;
+}
+
+/* ── AREA FILTER ── */
+.area-filters {
+  display:flex;
+  gap:8px;
+  margin-bottom:16px;
+  flex-wrap:wrap;
+}
+
+.area-btn {
+  padding:6px 16px;
+  border:1px solid var(--border);
+  border-radius:20px;
+  background:transparent;
+  color:var(--dim);
+  font-family:'DM Mono',monospace;
+  font-size:10px;
+  letter-spacing:1px;
+  cursor:pointer;
+  transition:all 0.2s;
+  text-transform:uppercase;
+}
+
+.area-btn:hover, .area-btn.active {
+  border-color:var(--cyan);
+  color:var(--cyan);
+  background:rgba(0,212,255,0.08);
+}
+
+/* ── LOADING ── */
+.loading {
+  text-align:center;
+  padding:40px;
+  color:var(--dim);
+  font-family:'DM Mono',monospace;
+  font-size:12px;
+  letter-spacing:2px;
+}
+
+.loading::after {
+  content:'...';
+  animation:dots 1.5s steps(4,end) infinite;
+}
+
+@keyframes dots {
+  0%,20%{content:'.';}
+  40%{content:'..';}
+  60%,100%{content:'...';}
+}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .grid-4,.grid-3{grid-template-columns:repeat(2,1fr);}
+  .grid-2,.grid-auto,.grid-3-1{grid-template-columns:1fr;}
+  .spots-grid{grid-template-columns:1fr 1fr;}
+  .catch-form{grid-template-columns:1fr 1fr;}
+  nav{display:none;}
+}
+
+/* ── PAGE SECTION TITLES ── */
+.section-title {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:18px;
+  letter-spacing:3px;
+  color:var(--cyan);
+  margin-bottom:14px;
+  opacity:0.8;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.section-title::after {
+  content:'';
+  flex:1;
+  height:1px;
+  background:var(--border);
+}
+
+/* ── SPECIES DETAIL MODAL ── */
+.modal-overlay {
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(2,12,24,0.92);
+  z-index:200;
+  backdrop-filter:blur(10px);
+  align-items:center;
+  justify-content:center;
+}
+
+.modal-overlay.open { display:flex; }
+
+.modal {
+  background:var(--deep);
+  border:1px solid var(--border2);
+  border-radius:16px;
+  padding:28px;
+  max-width:600px;
+  width:90%;
+  max-height:80vh;
+  overflow-y:auto;
+  position:relative;
+}
+
+.modal-close {
+  position:absolute;
+  top:16px; right:16px;
+  background:transparent;
+  border:none;
+  color:var(--dim);
+  font-size:20px;
+  cursor:pointer;
+}
+
+.modal-close:hover { color:var(--bright); }
+</style>
+</head>
+<body>
+
+<svg class="wave-bg" viewBox="0 0 1440 120" preserveAspectRatio="none">
+  <path d="M0,60 C240,100 480,20 720,60 C960,100 1200,20 1440,60 L1440,120 L0,120 Z" fill="rgba(0,150,200,1)" style="animation:wave1 8s ease-in-out infinite"/>
+  <path d="M0,80 C360,40 720,100 1080,60 C1260,40 1380,80 1440,80 L1440,120 L0,120 Z" fill="rgba(0,100,180,1)" style="animation:wave2 6s ease-in-out infinite"/>
+</svg>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div>
+      <div class="logo-mark">🎣 TIDE RUNNER</div>
+      <div class="logo-sub">Sydney Fishing Intelligence</div>
+    </div>
+  </div>
+
+  <nav>
+    <button class="nav-btn active" onclick="showPage('now')">NOW</button>
+    <button class="nav-btn" onclick="showPage('forecast')">FORECAST</button>
+    <button class="nav-btn" onclick="showPage('spots')">SPOTS</button>
+    <button class="nav-btn" onclick="showPage('species')">SPECIES</button>
+    <button class="nav-btn" onclick="showPage('solunar')">SOLUNAR</button>
+    <button class="nav-btn" onclick="showPage('log')">CATCH LOG</button>
+    <button class="nav-btn" onclick="showPage('info')" style="opacity:0.4;font-size:10px;" title="How it works">ⓘ</button>
+  </nav>
+
+  <div style="display:flex;align-items:center;gap:20px;">
+    <div>
+      <div class="score-label">NOW</div>
+      <div class="score-big" id="header-score">--</div>
+    </div>
+    <div class="wave-divider"></div>
+    <div class="time-display" id="clock">--:--:--</div>
+  </div>
+</header>
+
+<!-- ══ PAGE: NOW ══════════════════════════════════════════ -->
+<div class="page active" id="page-now">
+
+  <!-- Top row: Score + Tide Gauge + Next Tide + Moon -->
+  <div class="grid-4" style="margin-bottom:14px;">
+
+    <div class="card">
+      <div class="card-header"><div class="card-title">Fishing Score</div><div class="card-badge" id="score-badge">loading</div></div>
+      <div class="score-ring-wrap">
+        <div class="score-ring">
+          <svg width="140" height="140" viewBox="0 0 140 140">
+            <circle cx="70" cy="70" r="56" fill="none" stroke="rgba(0,30,60,0.8)" stroke-width="10"/>
+            <circle cx="70" cy="70" r="56" fill="none" stroke="url(#scoreGrad)" stroke-width="10"
+              stroke-linecap="round" stroke-dasharray="352" id="score-arc" stroke-dashoffset="352"/>
+            <defs>
+              <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" style="stop-color:#0066ff"/>
+                <stop offset="100%" style="stop-color:#00ffc8"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <div class="score-inner">
+            <div class="score-num" id="score-num">--</div>
+            <div class="score-lbl" id="score-lbl">---</div>
+          </div>
+        </div>
+        <div class="stars" id="score-stars">★★★★★</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title">Current Tide</div><div class="card-badge" id="tide-badge">live</div></div>
+      <div class="tide-gauge-wrap">
+        <div class="tide-gauge">
+          <div class="tide-fill" id="tide-fill" style="height:50%"></div>
+        </div>
+        <div class="tide-label" id="tide-height-label">--m</div>
+        <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--dim);letter-spacing:2px;" id="tide-direction">---</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title">Next Tide Change</div></div>
+      <div class="next-tide-box">
+        <div class="next-tide-countdown" id="next-tide-time">--:--</div>
+        <div class="next-tide-type" id="next-tide-type">calculating...</div>
+        <div style="margin-top:12px;font-family:'DM Mono',monospace;font-size:11px;color:var(--cyan);" id="next-tide-height">--m</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title">Moon Phase</div></div>
+      <div class="card-body">
+        <div class="moon-display">
+          <div class="moon-emoji-big" id="moon-emoji">🌑</div>
+          <div style="flex:1;">
+            <div style="font-weight:600;color:var(--bright);margin-bottom:6px;" id="moon-name">Loading...</div>
+            <div class="moon-phase-bar">
+              <div class="moon-phase-fill" id="moon-bar" style="width:0%"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:9px;color:var(--dim);margin-top:4px;">
+              <span>NEW</span><span>FULL</span>
+            </div>
+          </div>
+        </div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--dim);">
+          🌅 <span id="sunrise-time">--:--</span> &nbsp;|&nbsp; 🌇 <span id="sunset-time">--:--</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row 2: Conditions + Biting Now -->
+  <div class="grid-auto" style="margin-bottom:14px;">
+
+    <div class="card">
+      <div class="card-header"><div class="card-title">Conditions</div></div>
+      <div class="card-body" id="conditions-body">
+        <div class="loading">Loading</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title">What's Biting</div><div class="card-badge" id="biting-badge">now</div></div>
+      <div class="card-body" id="biting-body">
+        <div class="loading">Analysing</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Row 3: Today's Tides + Solunar -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header"><div class="card-title">Today's Tides — Port Hacking</div></div>
+      <div class="card-body">
+        <canvas class="tide-chart" id="today-chart" width="600" height="100"></canvas>
+        <div style="margin-top:12px;" id="tide-table-today"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title">Solunar Feeding Times</div><div class="card-badge">today</div></div>
+      <div class="card-body" id="solunar-today">
+        <div class="loading">Calculating</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PAGE: FORECAST ═════════════════════════════════════ -->
+<div class="page" id="page-forecast">
+  <div class="day-tabs" id="forecast-tabs"></div>
+  <div id="forecast-detail"><div class="loading">Loading forecast</div></div>
+</div>
+
+<!-- ══ PAGE: SPOTS ════════════════════════════════════════ -->
+<div class="page" id="page-spots">
+  <div class="area-filters" id="area-filters">
+    <button class="area-btn active" onclick="filterSpots('all',this)">All Areas</button>
+    <button class="area-btn" onclick="filterSpots('Georges River',this)">Georges River</button>
+    <button class="area-btn" onclick="filterSpots('Port Hacking',this)">Port Hacking</button>
+    <button class="area-btn" onclick="filterSpots('Botany Bay',this)">Botany Bay</button>
+    <button class="area-btn" onclick="filterSpots('Sydney Harbour',this)">Sydney Harbour</button>
+  </div>
+  <div class="spots-grid" id="spots-grid">
+    <div class="loading">Loading spots</div>
+  </div>
+</div>
+
+<!-- ══ PAGE: SPECIES ══════════════════════════════════════ -->
+<div class="page" id="page-species">
+  <div class="grid-3" id="species-grid">
+    <div class="loading">Loading species</div>
+  </div>
+</div>
+
+<!-- ══ PAGE: SOLUNAR ══════════════════════════════════════ -->
+<div class="page" id="page-solunar">
+  <div style="margin-bottom:16px;color:var(--dim);font-size:13px;line-height:1.6;">
+    Solunar theory predicts fish feeding activity based on moon position. 
+    <strong style="color:var(--gold)">Major periods</strong> occur when the moon is directly overhead or underfoot (2hr windows).
+    <strong style="color:var(--cyan)">Minor periods</strong> occur at 90° to these (1hr windows).
+    Combined with dawn/dusk and incoming tide — this is when you want to be on the water.
+  </div>
+  <div id="solunar-7day"><div class="loading">Calculating lunar tables</div></div>
+</div>
+
+<!-- ══ PAGE: CATCH LOG ════════════════════════════════════ -->
+<div class="page" id="page-log">
+  <div class="grid-4" id="catch-stats" style="margin-bottom:16px;"></div>
+  <div class="catch-form">
+    <div class="form-group">
+      <label class="form-label">Species</label>
+      <select class="form-input" id="log-species">
+        <option value="Bream">Bream</option>
+        <option value="Flathead">Flathead</option>
+        <option value="Whiting">Whiting</option>
+        <option value="Kingfish">Kingfish</option>
+        <option value="Snapper">Snapper</option>
+        <option value="Jewfish">Jewfish</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Location</label>
+      <select class="form-input" id="log-location">
+        <option value="Georges River">Georges River</option>
+        <option value="Port Hacking">Port Hacking</option>
+        <option value="Botany Bay">Botany Bay</option>
+        <option value="Sydney Harbour">Sydney Harbour</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Size (cm)</label>
+      <input type="number" class="form-input" id="log-size" placeholder="42" min="1" max="200">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Weight (kg)</label>
+      <input type="number" class="form-input" id="log-weight" placeholder="1.2" step="0.1" min="0.1" max="50">
+    </div>
+    <button class="btn-primary" onclick="logCatch()">+ LOG CATCH</button>
+  </div>
+  <div id="catch-list"><div class="loading">Loading catches</div></div>
+</div>
+
+<!-- Species Modal -->
+<div class="modal-overlay" id="species-modal" onclick="closeModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<script>
+// ── STATE ─────────────────────────────────────────────────
+let condData = null;
+let forecastData = null;
+let spotsData = null;
+let speciesData = null;
+let solunarData = null;
+let selectedForecastDay = 0;
+let allSpots = [];
+
+// ── CLOCK ─────────────────────────────────────────────────
+function updateClock() {
+  const t = new Date().toLocaleTimeString('en-AU',{hour12:false});
+  document.getElementById('clock').textContent = t;
+}
+setInterval(updateClock,1000);
+updateClock();
+
+// ── NAV ───────────────────────────────────────────────────
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  event.target.classList.add('active');
+  if (id==='forecast' && !forecastData) loadForecast();
+  if (id==='spots'    && !spotsData)   loadSpots();
+  if (id==='species'  && !speciesData) loadSpecies();
+  if (id==='solunar'  && !solunarData) loadSolunar();
+  if (id==='log')                      loadCatches();
+}
+
+// ── SCORE HELPERS ─────────────────────────────────────────
+function scoreColor(s) {
+  if (s>=85) return 'var(--teal)';
+  if (s>=70) return '#00aaff';
+  if (s>=55) return 'var(--gold)';
+  if (s>=40) return 'var(--coral)';
+  return '#888';
+}
+
+function scoreLabel(s) {
+  if (s>=85) return 'PRIME';
+  if (s>=70) return 'GREAT';
+  if (s>=55) return 'GOOD';
+  if (s>=40) return 'AVERAGE';
+  return 'POOR';
+}
+
+function starsHtml(n) {
+  return '★'.repeat(n) + '☆'.repeat(5-n);
+}
+
+// ── TIDE GRAPH ────────────────────────────────────────────
+function drawTideChart(heights, canvasId, showNow=true) {
+  const c = document.getElementById(canvasId);
+  if (!c || !heights || heights.length===0) return;
+  const ctx = c.getContext('2d');
+  const W=c.width, H=c.height;
+  ctx.clearRect(0,0,W,H);
+
+  const vals = heights.map(h=>h.height);
+  const min  = Math.min(...vals);
+  const max  = Math.max(...vals);
+  const range= max-min||1;
+
+  // bg
+  ctx.fillStyle='#020c18';
+  ctx.fillRect(0,0,W,H);
+
+  // grid
+  ctx.strokeStyle='rgba(0,180,220,0.06)';
+  ctx.lineWidth=1;
+  for(let i=0;i<=4;i++){
+    const y=H*0.08+H*0.84*i/4;
+    ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();
+  }
+
+  // hour labels
+  ctx.fillStyle='rgba(74,106,138,0.6)';
+  ctx.font='8px DM Mono,monospace';
+  ctx.textAlign='center';
+  ['00:00','06:00','12:00','18:00','24:00'].forEach((t,i)=>{
+    ctx.fillText(t,W*i/4,H-1);
+  });
+
+  // fill gradient
+  const grad=ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0,'rgba(0,100,200,0.35)');
+  grad.addColorStop(1,'rgba(0,100,200,0.02)');
+
+  ctx.beginPath();
+  heights.forEach((h,i)=>{
+    const x=W*i/(heights.length-1);
+    const y=H*0.9-H*0.8*(h.height-min)/range;
+    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  });
+  ctx.lineTo(W,H);ctx.lineTo(0,H);ctx.closePath();
+  ctx.fillStyle=grad;ctx.fill();
+
+  // line
+  ctx.beginPath();
+  ctx.strokeStyle='#0088ff';
+  ctx.lineWidth=2;
+  ctx.shadowColor='rgba(0,136,255,0.5)';
+  ctx.shadowBlur=8;
+  heights.forEach((h,i)=>{
+    const x=W*i/(heights.length-1);
+    const y=H*0.9-H*0.8*(h.height-min)/range;
+    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+  ctx.shadowBlur=0;
+
+  // NOW line
+  if(showNow){
+    const now=new Date();
+    const mins=now.getHours()*60+now.getMinutes();
+    const nx=W*mins/1440;
+    ctx.strokeStyle='rgba(0,212,255,0.7)';
+    ctx.lineWidth=1.5;
+    ctx.setLineDash([3,3]);
+    ctx.beginPath();ctx.moveTo(nx,0);ctx.lineTo(nx,H-10);ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle='var(--cyan)';
+    ctx.font='8px DM Mono,monospace';
+    ctx.textAlign='center';
+    ctx.fillText('▼',nx,8);
+  }
+}
+
+// ── LOAD: CONDITIONS (NOW PAGE) ───────────────────────────
+async function loadConditions() {
+  try {
+    const res = await fetch('/api/conditions');
+    condData  = await res.json();
+    renderNow(condData);
+  } catch(e) {
+    document.getElementById('conditions-body').innerHTML =
+      `<div style="color:var(--coral);font-size:12px;">Error: ${e.message}</div>`;
+  }
+}
+
+function renderNow(d) {
+  if (!d) return;
+  const sc = d.score;
+
+  // Header score
+  document.getElementById('header-score').textContent = sc.score;
+  document.getElementById('header-score').style.color = scoreColor(sc.score);
+
+  // Score ring
+  document.getElementById('score-num').textContent = sc.score;
+  document.getElementById('score-num').style.color = scoreColor(sc.score);
+  document.getElementById('score-lbl').textContent = sc.label;
+  document.getElementById('score-badge').textContent = sc.label;
+  document.getElementById('score-stars').textContent = starsHtml(sc.stars);
+  document.getElementById('score-stars').style.color = scoreColor(sc.score);
+
+  // Animate ring
+  const arc = document.getElementById('score-arc');
+  const circ = 352;
+  const offset = circ - (sc.score / 100) * circ;
+  arc.style.transition = 'stroke-dashoffset 1.5s ease';
+  arc.setAttribute('stroke-dashoffset', offset);
+  arc.setAttribute('stroke', scoreColor(sc.score));
+
+  // Moon
+  document.getElementById('moon-emoji').textContent = d.moon.emoji;
+  document.getElementById('moon-name').textContent  = d.moon.name;
+  document.getElementById('moon-bar').style.width   = d.moon.pct+'%';
+  document.getElementById('sunrise-time').textContent = d.weather.sunrise||'--:--';
+  document.getElementById('sunset-time').textContent  = d.weather.sunset||'--:--';
+
+  // Tide gauge
+  if (d.tides && d.tides.length >= 2) {
+    const heights = d.tides.map(t=>t.height);
+    const maxH = Math.max(...heights);
+    const minH = Math.min(...heights);
+    // Estimate current height from nearest extremes
+    const pct = 50; // simplified
+    document.getElementById('tide-fill').style.height = pct+'%';
+  }
+
+  // Next tide
+  if (d.next_tide) {
+    const nt = d.next_tide;
+    document.getElementById('next-tide-time').textContent = nt.in_str||'--';
+    document.getElementById('next-tide-type').textContent = nt.type + ' tide at ' + nt.time;
+    document.getElementById('next-tide-height').textContent = nt.height+'m';
+    document.getElementById('tide-badge').textContent = nt.type === 'HIGH' ? '↑ RISING' : '↓ FALLING';
+    document.getElementById('tide-direction').textContent = nt.type === 'HIGH' ? '↑ INCOMING' : '↓ OUTGOING';
+  }
+
+  // Conditions
+  const w = d.weather;
+  const m = d.marine||{};
+  const pt = w.pressure_trend||'stable';
+  const ptColor = pt==='rising'?'var(--teal)':pt==='falling'?'var(--coral)':'var(--gold)';
+  const ptArrow = pt==='rising'?'↑':pt==='falling'?'↓':'→';
+  const windClass = w.wind_speed<10?'badge-good':w.wind_speed<20?'badge-warn':'badge-bad';
+
+  document.getElementById('conditions-body').innerHTML = `
+    <div class="cond-item">
+      <span class="cond-label">Temperature</span>
+      <span class="cond-value">${w.temp}°C</span>
+      <span class="cond-badge badge-info">Feels ${w.feels_like}°C</span>
+    </div>
+    <div class="cond-item">
+      <span class="cond-label">Wind</span>
+      <span class="cond-value">${w.wind_speed} km/h ${w.wind_dir||''}</span>
+      <span class="cond-badge ${windClass}">${w.wind_speed<10?'LIGHT':w.wind_speed<20?'MODERATE':'STRONG'}</span>
+    </div>
+    <div class="cond-item">
+      <span class="cond-label">Pressure</span>
+      <span class="cond-value">${w.pressure} hPa</span>
+      <span class="cond-badge" style="color:${ptColor};border-color:${ptColor};background:transparent;">${ptArrow} ${pt.toUpperCase()}</span>
+    </div>
+    <div class="cond-item">
+      <span class="cond-label">Swell</span>
+      <span class="cond-value">${m.wave_height||'--'} m</span>
+      <span class="cond-badge badge-info">${m.wave_period||'--'}s period</span>
+    </div>
+    <div class="cond-item">
+      <span class="cond-label">UV Index</span>
+      <span class="cond-value">${w.uv_max||'--'}</span>
+      <span class="cond-badge ${(w.uv_max||0)>6?'badge-bad':'badge-good'}">${(w.uv_max||0)>8?'EXTREME':(w.uv_max||0)>6?'HIGH':'MODERATE'}</span>
+    </div>
+    <div class="cond-item">
+      <span class="cond-label">Rain Chance</span>
+      <span class="cond-value">${w.rain_chance||0}%</span>
+      <span class="cond-badge ${(w.rain_chance||0)>50?'badge-bad':'badge-good'}">${(w.rain_chance||0)>50?'LIKELY':'LOW'}</span>
+    </div>
+  `;
+
+  // Biting now
+  if (d.biting && d.biting.length) {
+    document.getElementById('biting-badge').textContent = d.biting.length + ' ACTIVE';
+    document.getElementById('biting-body').innerHTML = d.biting.map(b=>`
+      <div class="biting-item">
+        <div class="biting-emoji">${b.emoji}</div>
+        <div>
+          <div class="biting-name" style="color:${b.color}">${b.name}</div>
+          <div class="biting-tip">${b.tip}</div>
+        </div>
+        <div class="biting-score">
+          <div class="biting-score-num" style="color:${scoreColor(b.score)}">${b.score}</div>
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--dim);">score</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Tide table
+  if (d.tides && d.tides.length) {
+    document.getElementById('tide-table-today').innerHTML = d.tides.map(t=>`
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);">
+        <span style="color:${t.type==='HIGH'?'var(--cyan)':'var(--dim)'};font-weight:600;font-size:13px;">
+          ${t.type==='HIGH'?'▲':'▼'} ${t.type}
+        </span>
+        <span style="font-family:'DM Mono',monospace;font-size:14px;color:var(--bright);">${t.time}</span>
+        <span style="font-family:'DM Mono',monospace;font-size:13px;color:var(--dim);">${t.height}m</span>
+      </div>
+    `).join('');
+  }
+
+  // Solunar today
+  if (d.solunar) {
+    const all = [...d.solunar.major.map(s=>({...s,type:'major'})),
+                 ...d.solunar.minor.map(s=>({...s,type:'minor'}))];
+    all.sort((a,b)=>a.time.localeCompare(b.time));
+    document.getElementById('solunar-today').innerHTML = all.map(s=>`
+      <div class="solunar-row">
+        <div class="solunar-time">${s.time}</div>
+        <div class="solunar-type" style="color:${s.type==='major'?'var(--gold)':'var(--cyan)'}">${s.label}</div>
+        <div class="solunar-bar">
+          <div class="${s.type==='major'?'solunar-fill-major':'solunar-fill-minor'}"></div>
+        </div>
+        <div class="cond-badge ${s.type==='major'?'badge-warn':'badge-info'}">${s.duration}</div>
+      </div>
+    `).join('');
+  }
+
+  // Draw tide chart (delayed to ensure canvas is visible)
+  setTimeout(() => {
+    if (d.tides_heights) drawTideChart(d.tides_heights, 'today-chart', true);
+  }, 100);
+}
+
+// ── LOAD: FORECAST ────────────────────────────────────────
+async function loadForecast() {
+  try {
+    const res = await fetch('/api/forecast');
+    forecastData = await res.json();
+    renderForecastTabs();
+    renderForecastDay(0);
+  } catch(e) {
+    document.getElementById('forecast-detail').innerHTML =
+      `<div style="color:var(--coral)">Error: ${e.message}</div>`;
+  }
+}
+
+function renderForecastTabs() {
+  const tabs = document.getElementById('forecast-tabs');
+  tabs.innerHTML = forecastData.days.map((d,i)=>`
+    <div class="day-tab ${i===0?'active':''}" id="ftab-${i}" onclick="renderForecastDay(${i})">
+      <div class="day-tab-label">${d.label}</div>
+      <div class="day-tab-score" style="color:${scoreColor(d.score.score)}">${d.score.score}</div>
+      <div class="day-tab-rating" style="color:${scoreColor(d.score.score)}">${d.score.label}</div>
+    </div>
+  `).join('');
+}
+
+function renderForecastDay(idx) {
+  selectedForecastDay = idx;
+  document.querySelectorAll('.day-tab').forEach((t,i)=>t.classList.toggle('active',i===idx));
+  const d = forecastData.days[idx];
+  const sc = d.score;
+  const w  = d.weather||{};
+  const sol_all = [...(d.solunar.major||[]).map(s=>({...s,type:'major'})),
+                   ...(d.solunar.minor||[]).map(s=>({...s,type:'minor'}))];
+  sol_all.sort((a,b)=>a.time.localeCompare(b.time));
+
+  const tideRows = (d.extremes||[]).map(t=>`
+    <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);">
+      <span style="color:${t.type==='HIGH'?'var(--cyan)':'var(--dim)'};font-weight:600;">${t.type==='HIGH'?'▲':'▼'} ${t.type}</span>
+      <span style="font-family:'DM Mono',monospace;color:var(--bright);">${t.time}</span>
+      <span style="font-family:'DM Mono',monospace;color:var(--dim);">${t.height}m</span>
+    </div>`).join('') || '<div style="color:var(--dim);font-size:12px;padding:8px 0;">No tide data cached</div>';
+
+  const windowRows = (d.windows||[]).map(w=>
+    `<div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--teal);padding:5px 0;border-bottom:1px solid var(--border);">🎯 ${w}</div>`
+  ).join('');
+
+  document.getElementById('forecast-detail').innerHTML = `
+    <div class="grid-4" style="margin-bottom:14px;">
+      <div class="stat-box" style="text-align:center;">
+        <div class="stat-label">Score</div>
+        <div class="stat-value" style="color:${scoreColor(sc.score)}">${sc.score}</div>
+        <div class="stat-sub">${sc.label}</div>
+        <div class="stars" style="justify-content:center;margin-top:6px;">${starsHtml(sc.stars)}</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Moon</div>
+        <div style="font-size:32px;margin-bottom:6px;">${d.moon.emoji}</div>
+        <div style="font-size:12px;color:var(--bright);">${d.moon.name}</div>
+        <div class="stat-sub">${d.moon.pct}% cycle</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Weather</div>
+        <div class="stat-value" style="font-size:24px;">${w.temp_max||'--'}° / ${w.temp_min||'--'}°</div>
+        <div class="stat-sub">💨 ${w.wind_max||'--'} km/h max &nbsp; 🌧 ${w.rain_chance||0}%</div>
+        <div class="stat-sub">🌅 ${w.sunrise||'--'} &nbsp; 🌇 ${w.sunset||'--'}</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Tide Range</div>
+        <div class="stat-value" style="color:var(--cyan)">${d.tide_range}m</div>
+        <div class="stat-sub">${d.extremes.length} tide changes</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Tide Graph</div></div>
+        <div class="card-body">
+          <canvas class="tide-chart" id="forecast-chart" width="600" height="100"></canvas>
+          <div style="margin-top:12px;">${tideRows}</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Best Windows & Solunar</div></div>
+        <div class="card-body">
+          ${windowRows ? `<div style="margin-bottom:14px;">${windowRows}</div>` : ''}
+          ${sol_all.map(s=>`
+            <div class="solunar-row">
+              <div class="solunar-time">${s.time}</div>
+              <div class="solunar-type" style="color:${s.type==='major'?'var(--gold)':'var(--cyan)'}">${s.label}</div>
+              <div class="solunar-bar">
+                <div class="${s.type==='major'?'solunar-fill-major':'solunar-fill-minor'}"></div>
+              </div>
+              <div class="cond-badge ${s.type==='major'?'badge-warn':'badge-info'}">${s.duration}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+  setTimeout(()=>drawTideChart(d.heights||[], 'forecast-chart', idx===0), 80);
+}
+
+// ── LOAD: SPOTS ───────────────────────────────────────────
+async function loadSpots() {
+  try {
+    const res = await fetch('/api/spots');
+    spotsData = await res.json();
+    allSpots = spotsData.spots;
+    renderSpots(allSpots);
+  } catch(e) {
+    document.getElementById('spots-grid').innerHTML = `<div style="color:var(--coral)">Error: ${e.message}</div>`;
+  }
+}
+
+function filterSpots(area, btn) {
+  document.querySelectorAll('.area-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const filtered = area==='all' ? allSpots : allSpots.filter(s=>s.area===area);
+  renderSpots(filtered);
+}
+
+function renderSpots(spots) {
+  document.getElementById('spots-grid').innerHTML = spots.map(sp=>{
+    const activeSpecies = sp.species_data.filter(s=>s.active);
+    const stars = '★'.repeat(sp.rating)+'☆'.repeat(5-sp.rating);
+    return `
+      <div class="spot-card" onclick="showSpotDetail('${sp.id}')">
+        <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px;">
+          <div>
+            <div class="spot-name">${sp.name}</div>
+            <div class="spot-area">${sp.area}</div>
+          </div>
+          <div style="color:var(--gold);font-size:12px;">${stars}</div>
+        </div>
+        <div class="spot-type-badge">${sp.type} &bull; ${sp.depth}</div>
+        <div class="spot-species">
+          ${sp.species_data.map(s=>`
+            <span class="spot-species-tag" style="border-color:${s.active?s.color:'var(--border)'};color:${s.active?s.color:'var(--dim)'};">
+              ${s.emoji} ${s.name}${s.active?' ✓':''}
+            </span>
+          `).join('')}
+        </div>
+        <div class="spot-tip">${sp.tips}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function showSpotDetail(id) {
+  const sp = allSpots.find(s=>s.id===id);
+  if (!sp) return;
+  document.getElementById('modal-content').innerHTML = `
+    <div style="margin-bottom:16px;">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--bright);letter-spacing:2px;">${sp.name}</div>
+      <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--cyan);letter-spacing:2px;">${sp.area} &bull; ${sp.type} &bull; Depth: ${sp.depth}</div>
+    </div>
+    <div style="margin-bottom:16px;">
+      <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--dim);margin-bottom:8px;">TARGET SPECIES</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        ${sp.species_data.map(s=>`
+          <div style="padding:8px 14px;border-radius:8px;border:1px solid ${s.color}22;background:${s.color}11;text-align:center;">
+            <div style="font-size:20px;">${s.emoji}</div>
+            <div style="font-size:11px;color:${s.active?s.color:'var(--dim)'};font-weight:600;margin-top:4px;">${s.name}</div>
+            <div style="font-size:9px;color:var(--dim);font-family:'DM Mono',monospace;">${s.active?'IN SEASON':'off season'}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+    <div style="padding:14px;background:rgba(0,212,255,0.05);border-radius:8px;border:1px solid var(--border2);">
+      <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--cyan);margin-bottom:8px;">FISHING TIPS</div>
+      <div style="font-size:13px;line-height:1.7;color:var(--text);">${sp.tips}</div>
+    </div>
+    <div style="margin-top:14px;font-family:'DM Mono',monospace;font-size:10px;color:var(--dim);">
+      📍 ${sp.lat}°S, ${sp.lon}°E
+    </div>
+  `;
+  document.getElementById('species-modal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('species-modal').classList.remove('open');
+}
+
+// ── LOAD: SPECIES ─────────────────────────────────────────
+async function loadSpecies() {
+  try {
+    const res = await fetch('/api/species');
+    speciesData = await res.json();
+    renderSpecies();
+  } catch(e) {
+    document.getElementById('species-grid').innerHTML = `<div style="color:var(--coral)">Error</div>`;
+  }
+}
+
+function renderSpecies() {
+  const d = speciesData;
+  document.getElementById('species-grid').innerHTML = d.species.map(sp=>`
+    <div class="species-card" onclick="showSpeciesDetail('${sp.key}')" style="border-color:${sp.icon}22;">
+      <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${sp.icon};opacity:0.7;"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+        <div class="species-name" style="color:${sp.icon}">${sp.emoji} ${sp.name}</div>
+        <div class="cond-badge ${sp.in_season?'badge-good':'badge-bad'}">${sp.in_season?'IN SEASON':'OFF'}</div>
+      </div>
+      <div style="font-size:12px;color:var(--dim);margin-bottom:10px;line-height:1.4;">${sp.desc}</div>
+      <div class="species-score-bar">
+        <div class="species-score-fill" style="width:${sp.current_score}%;background:${sp.icon};"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:10px;color:var(--dim);">
+        <span>Conditions score: <span style="color:${sp.icon}">${sp.current_score}/100</span></span>
+        <span>Min: ${sp.min_size}cm &bull; Bag: ${sp.bag_limit}</span>
+      </div>
+      <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+        ${sp.moon_good?'<span class="cond-badge badge-good">🌙 Moon ✓</span>':''}
+        ${sp.wind_ok?'<span class="cond-badge badge-good">💨 Wind ✓</span>':''}
+        ${sp.in_season?'<span class="cond-badge badge-good">📅 Season ✓</span>':''}
+      </div>
+    </div>
+  `).join('');
+}
+
+function showSpeciesDetail(key) {
+  if (!speciesData) return;
+  const sp = speciesData.species.find(s=>s.key===key);
+  if (!sp) return;
+  document.getElementById('modal-content').innerHTML = `
+    <div style="margin-bottom:16px;">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:2px;color:${sp.icon};">${sp.emoji} ${sp.name}</div>
+      <div style="font-size:13px;color:var(--text);line-height:1.6;margin-top:8px;">${sp.desc}</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+      <div style="padding:12px;background:rgba(0,0,0,0.3);border-radius:8px;border:1px solid var(--border);">
+        <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--dim);margin-bottom:8px;">BEST TIDE</div>
+        <div style="font-size:13px;color:var(--bright);">${sp.best_tide}</div>
+      </div>
+      <div style="padding:12px;background:rgba(0,0,0,0.3);border-radius:8px;border:1px solid var(--border);">
+        <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--dim);margin-bottom:8px;">BEST TIME</div>
+        <div style="font-size:13px;color:var(--bright);">${sp.best_time}</div>
+      </div>
+      <div style="padding:12px;background:rgba(0,0,0,0.3);border-radius:8px;border:1px solid var(--border);">
+        <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--dim);margin-bottom:8px;">MOON PHASE</div>
+        <div style="font-size:13px;color:var(--bright);">${sp.moon}</div>
+      </div>
+      <div style="padding:12px;background:rgba(0,0,0,0.3);border-radius:8px;border:1px solid var(--border);">
+        <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--dim);margin-bottom:8px;">PRESSURE</div>
+        <div style="font-size:13px;color:var(--bright);">${sp.pressure}</div>
+      </div>
+    </div>
+    <div style="padding:12px;background:rgba(0,0,0,0.3);border-radius:8px;border:1px solid var(--border);margin-bottom:12px;">
+      <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--dim);margin-bottom:8px;">BEST BAIT & LURES</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        ${sp.best_bait.map(b=>`<span style="padding:4px 10px;background:rgba(0,212,255,0.08);border:1px solid var(--border2);border-radius:4px;font-size:12px;color:var(--cyan);">${b}</span>`).join('')}
+      </div>
+    </div>
+    <div style="padding:12px;background:rgba(0,212,255,0.05);border-radius:8px;border:1px solid var(--border2);">
+      <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--cyan);margin-bottom:8px;">PRO TIPS</div>
+      <div style="font-size:13px;line-height:1.7;color:var(--text);">${sp.tips}</div>
+    </div>
+    <div style="margin-top:12px;display:flex;gap:16px;font-family:'DM Mono',monospace;font-size:11px;color:var(--dim);">
+      <span>Min size: <strong style="color:var(--bright)">${sp.min_size}cm</strong></span>
+      <span>Bag limit: <strong style="color:var(--bright)">${sp.bag_limit}</strong></span>
+    </div>
+  `;
+  document.getElementById('species-modal').classList.add('open');
+}
+
+// ── LOAD: SOLUNAR ─────────────────────────────────────────
+async function loadSolunar() {
+  try {
+    const res = await fetch('/api/solunar');
+    solunarData = await res.json();
+    renderSolunar7Day();
+  } catch(e) {
+    document.getElementById('solunar-7day').innerHTML = `<div style="color:var(--coral)">Error</div>`;
+  }
+}
+
+function renderSolunar7Day() {
+  const days = solunarData.days;
+  document.getElementById('solunar-7day').innerHTML = days.map(d=>{
+    const all = [...d.solunar.major.map(s=>({...s,type:'major'})),
+                 ...d.solunar.minor.map(s=>({...s,type:'minor'}))];
+    all.sort((a,b)=>a.time.localeCompare(b.time));
+    return `
+      <div class="card" style="margin-bottom:12px;">
+        <div class="card-header">
+          <div class="card-title">${d.label} &nbsp; ${d.moon.emoji} ${d.moon.name}</div>
+          ${d.best?'<div class="card-badge" style="color:var(--gold);border-color:var(--gold);">★ PRIME MOON</div>':''}
+        </div>
+        <div class="card-body">
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+            ${all.map(s=>`
+              <div style="padding:12px;text-align:center;background:rgba(0,0,0,0.2);border-radius:8px;
+                          border:1px solid ${s.type==='major'?'rgba(255,208,96,0.2)':'var(--border)'};">
+                <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;
+                             color:${s.type==='major'?'var(--gold)':'var(--cyan)'};margin-bottom:6px;">
+                  ${s.label}
+                </div>
+                <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--bright);">${s.time}</div>
+                <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--dim);margin-top:4px;">${s.duration} window</div>
+                <div style="font-size:10px;color:${s.type==='major'?'var(--gold)':'var(--cyan)'};margin-top:4px;">${s.rating}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ── CATCH LOG ─────────────────────────────────────────────
+async function loadCatches() {
+  try {
+    const res = await fetch('/api/catches');
+    const data = await res.json();
+    renderCatches(data);
+  } catch(e) {
+    document.getElementById('catch-list').innerHTML = `<div style="color:var(--coral)">Error</div>`;
+  }
+}
+
+function renderCatches(data) {
+  // Stats
+  document.getElementById('catch-stats').innerHTML = `
+    <div class="catch-stat"><div class="catch-stat-num">${data.total}</div><div class="catch-stat-label">Total Catches</div></div>
+    <div class="catch-stat">
+      <div class="catch-stat-num">${Object.keys(data.by_species).length}</div>
+      <div class="catch-stat-label">Species</div>
+    </div>
+    <div class="catch-stat">
+      <div class="catch-stat-num">${data.best_catch ? data.best_catch.weight+'kg' : '--'}</div>
+      <div class="catch-stat-label">Biggest Catch</div>
+    </div>
+    <div class="catch-stat">
+      <div class="catch-stat-num">${data.best_catch ? data.best_catch.species : '--'}</div>
+      <div class="catch-stat-label">Best Species</div>
+    </div>
+  `;
+
+  if (!data.catches || data.catches.length===0) {
+    document.getElementById('catch-list').innerHTML = `
+      <div style="text-align:center;padding:40px;color:var(--dim);">
+        <div style="font-size:40px;margin-bottom:12px;">🎣</div>
+        <div style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:2px;">NO CATCHES LOGGED YET</div>
+        <div style="font-size:12px;margin-top:8px;">Log your first catch above!</div>
+      </div>`;
+    return;
+  }
+
+  document.getElementById('catch-list').innerHTML = `
+    <div class="catch-item" style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--dim);padding:8px 0;border-bottom:1px solid var(--border);">
+      <span>SPECIES</span><span>LOCATION</span><span>SIZE</span><span>WEIGHT</span><span>DATE</span><span></span>
+    </div>
+    ${data.catches.map(c=>`
+      <div class="catch-item">
+        <div class="catch-species-name">${c.species}</div>
+        <div class="catch-detail">${c.location||'--'}</div>
+        <div class="catch-detail">${c.size ? c.size+'cm' : '--'}</div>
+        <div class="catch-detail">${c.weight ? c.weight+'kg' : '--'}</div>
+        <div class="catch-detail">${c.logged_at ? c.logged_at.substring(0,10) : '--'}</div>
+        <button class="btn-delete" onclick="deleteCatch(${c.id})">✕</button>
+      </div>
+    `).join('')}
+  `;
+}
+
+async function logCatch() {
+  const species  = document.getElementById('log-species').value;
+  const location = document.getElementById('log-location').value;
+  const size     = parseFloat(document.getElementById('log-size').value)||null;
+  const weight   = parseFloat(document.getElementById('log-weight').value)||null;
+  if (!species) return;
+  try {
+    const res = await fetch('/api/catches', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({species, location, size, weight})
+    });
+    const data = await res.json();
+    if (data.ok) {
+      document.getElementById('log-size').value='';
+      document.getElementById('log-weight').value='';
+      loadCatches();
+    }
+  } catch(e) { alert('Error logging catch: '+e.message); }
+}
+
+async function deleteCatch(id) {
+  try {
+    await fetch('/api/catches', {
+      method:'DELETE',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({id})
+    });
+    loadCatches();
+  } catch(e) {}
+}
+
+// ── INIT ──────────────────────────────────────────────────
+loadConditions();
+setInterval(loadConditions, 60000); // refresh every minute
+</script>
+
+<!-- ══ PAGE: INFO ════════════════════════════════════════ -->
+<div class="page" id="page-info">
+  <div style="max-width:900px;margin:0 auto;">
+
+    <div style="margin-bottom:28px;">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:4px;color:var(--cyan);margin-bottom:8px;">HOW IT WORKS</div>
+      <div style="font-size:13px;color:var(--dim);line-height:1.6;">Everything in Tide Runner is calculated locally on your machine from real data sources. No black boxes, no paywalls. Here's exactly how every number is derived.</div>
+    </div>
+
+    <!-- Score Formula -->
+    <div class="card" style="margin-bottom:14px;">
+      <div class="card-header"><div class="card-title">🎯 Fishing Score Algorithm</div><div class="card-badge">0–100</div></div>
+      <div class="card-body">
+        <div style="font-size:13px;color:var(--text);margin-bottom:16px;line-height:1.6;">
+          The overall fishing score is a weighted composite of 6 independent variables. Each factor is scored 0–100 then multiplied by its weight.
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+          ${[
+            ['Time of Day','25%','Dawn (04–08h) & dusk (16–20h) = 100. Midday (10–14h) = 25. Night = 60. Based on fish feeding behaviour driven by light levels and baitfish movement.'],
+            ['Moon Phase','20%','New moon & full moon = 95–100 (gravitational tidal forces peak). Quarter moons = 70. Mid-cycle = 50. Uses precise astronomical algorithm.'],
+            ['Barometric Pressure','20%','Rising pressure = 85 (fish feed aggressively before fronts). Stable = 70. Falling = 40 (fish go deep and stop feeding). Derived from 3hr pressure trend.'],
+            ['Wind Speed','15%','Under 10 km/h = 100. 10–20 = 75. 20–30 = 45. Over 30 = 20. Light winds mean better visibility, less surface disturbance, easier casting.'],
+            ['Tidal Range','15%','Calculated as HIGH tide height minus LOW tide height from WorldTides data. Bigger range = more water movement = more bait and predator activity.'],
+            ['Swell Height','5%','Under 0.5m = 90. 0.5–1m = 75. 1–1.5m = 55. Over 1.5m = 30. From Open-Meteo marine API. Affects estuary conditions less than coastal.'],
+          ].map(([name, weight, desc]) => `
+            <div style="padding:14px;background:rgba(0,0,0,0.3);border-radius:8px;border:1px solid var(--border);">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                <div style="font-weight:600;color:var(--bright);font-size:14px;">${name}</div>
+                <div style="font-family:'DM Mono',monospace;font-size:13px;color:var(--cyan);font-weight:700;">${weight}</div>
+              </div>
+              <div style="font-size:12px;color:var(--dim);line-height:1.5;">${desc}</div>
+            </div>
+          `).join('')}
+        </div>
+        <div style="padding:14px;background:rgba(0,212,255,0.05);border-radius:8px;border:1px solid var(--border2);font-family:'DM Mono',monospace;font-size:12px;color:var(--text);">
+          <span style="color:var(--cyan);">FORMULA:</span> Score = (time×0.25) + (moon×0.20) + (pressure×0.20) + (wind×0.15) + (tide_range×0.15) + (swell×0.05)
+        </div>
+      </div>
+    </div>
+
+    <!-- Solunar -->
+    <div class="card" style="margin-bottom:14px;">
+      <div class="card-header"><div class="card-title">🌙 Solunar Theory</div><div class="card-badge">Astronomical</div></div>
+      <div class="card-body">
+        <div style="font-size:13px;color:var(--text);line-height:1.6;margin-bottom:14px;">
+          Solunar theory was developed by John Alden Knight in 1926 after observing that fish and game activity peaked at predictable times related to the moon's position. It's been refined over nearly 100 years and is used by serious anglers and hunters worldwide.
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div style="padding:14px;background:rgba(255,208,96,0.05);border-radius:8px;border:1px solid rgba(255,208,96,0.15);">
+            <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--gold);margin-bottom:8px;">MAJOR PERIODS (2hrs)</div>
+            <div style="font-size:12px;color:var(--text);line-height:1.6;">Occur when the moon is directly <strong style="color:var(--bright)">overhead</strong> or <strong style="color:var(--bright)">underfoot</strong> (transit and anti-transit). Gravitational pull is strongest — triggers instinctive feeding response. Two per day, ~12hrs apart.</div>
+          </div>
+          <div style="padding:14px;background:rgba(0,212,255,0.05);border-radius:8px;border:1px solid rgba(0,212,255,0.15);">
+            <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--cyan);margin-bottom:8px;">MINOR PERIODS (1hr)</div>
+            <div style="font-size:12px;color:var(--text);line-height:1.6;">Occur when the moon is at <strong style="color:var(--bright)">90° offset</strong> to transit (moonrise and moonset). Secondary gravitational influence. Less powerful than majors but still worth targeting, especially when overlapping with dawn/dusk.</div>
+          </div>
+        </div>
+        <div style="margin-top:12px;font-size:12px;color:var(--dim);padding:10px;background:rgba(0,0,0,0.2);border-radius:6px;border-left:3px solid var(--gold);">
+          <strong style="color:var(--gold)">Best combination:</strong> Major solunar period + incoming tide + dawn or dusk = maximum fish activity. When all three align, that's your target window.
+        </div>
+      </div>
+    </div>
+
+    <!-- Species Data -->
+    <div class="card" style="margin-bottom:14px;">
+      <div class="card-header"><div class="card-title">🐟 Species Data Sources</div><div class="card-badge">NSW DPI + Field Knowledge</div></div>
+      <div class="card-body">
+        <div style="font-size:13px;color:var(--text);line-height:1.6;margin-bottom:14px;">
+          Species information is curated from NSW Department of Primary Industries fishing regulations, peer-reviewed fish behaviour research, and established Sydney fishing knowledge built up over decades by local anglers.
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+          ${[
+            ['Legal Sizes & Bag Limits','NSW DPI Recreational Fishing Guide 2024. Always verify current regulations at dpi.nsw.gov.au as these change.'],
+            ['Best Seasons','Based on spawning cycles, water temperature preferences, and baitfish availability in Sydney's estuaries and coastal waters.'],
+            ['Tide Preferences','Species-specific research. E.g. Flathead ambush on outgoing tide as baitfish are swept through channels. Bream follow prawns on incoming tide.'],
+            ['Moon Preferences','Jewfish actively feed on dark (new moon) nights. Kingfish respond to full moon tidal surges. Based on documented catch data patterns.'],
+            ['Bait Recommendations','Matched to each species' natural prey items in Sydney waters. Includes both live bait, cut bait, and artificial lures that most accurately mimic natural food.'],
+            ['Fishing Tips','Derived from established techniques used successfully by Sydney estuary and coastal anglers, accounting for local conditions and structure.'],
+          ].map(([name, desc]) => `
+            <div style="padding:12px;background:rgba(0,0,0,0.2);border-radius:8px;border:1px solid var(--border);">
+              <div style="font-weight:600;color:var(--bright);font-size:12px;margin-bottom:6px;">${name}</div>
+              <div style="font-size:11px;color:var(--dim);line-height:1.5;">${desc}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+
+    <!-- Data Sources -->
+    <div class="card" style="margin-bottom:14px;">
+      <div class="card-header"><div class="card-title">📡 Live Data Sources</div><div class="card-badge">Real-time</div></div>
+      <div class="card-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          ${[
+            ['🌊 Tide Data','WorldTides API','Hydrographic predictions for Port Hacking (-33.9558, 151.0617). Fetched twice weekly (Mon & Thu), 7 days of extremes + 15-min interval heights cached locally. 1 API credit per 7-day fetch.','worldtides.info'],
+            ['🌤️ Weather','Open-Meteo','Temperature, wind, pressure, UV, rain probability. Marine API for wave height, period, ocean current. Free, no API key, updates every 60 seconds from local server.','open-meteo.com'],
+            ['🌙 Moon Phase','Local Calculation','Astronomical algorithm based on known new moon epoch (Jan 6, 2000 18:14 UTC). Synodic cycle = 29.53058867 days. Accurate to within minutes. Zero API calls.','Built-in'],
+            ['📅 Solunar Times','Local Calculation','Derived from moon phase position. Major periods = moon transit (overhead/underfoot). Minor = 90° offset. Calculated fresh for each day, zero API calls.','Built-in'],
+            ['🌅 Sunrise/Sunset','Open-Meteo','Daily sunrise and sunset times for Peakhurst coordinates. Fetched with weather data, no additional cost.','open-meteo.com'],
+            ['📝 Catch Log','Local SQLite','Your catch data is stored in ~/.openclaw/cache/catches.json on your machine. Never leaves your computer. No cloud sync.','Local only'],
+          ].map(([icon, name, desc, source]) => `
+            <div style="padding:14px;background:rgba(0,0,0,0.2);border-radius:8px;border:1px solid var(--border);">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                <div style="font-weight:600;color:var(--bright);font-size:13px;">${icon} ${name}</div>
+                <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--cyan);letter-spacing:1px;">${source}</div>
+              </div>
+              <div style="font-size:11px;color:var(--dim);line-height:1.5;">${desc}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+
+    <!-- Disclaimer -->
+    <div style="padding:16px;background:rgba(0,0,0,0.2);border-radius:8px;border:1px solid var(--border);margin-bottom:14px;">
+      <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--dim);margin-bottom:8px;">DISCLAIMER</div>
+      <div style="font-size:12px;color:var(--dim);line-height:1.6;">
+        Tide Runner provides fishing intelligence based on environmental data and established fishing theory. Scores and recommendations are guidance only — actual fish behaviour is influenced by many additional factors including water clarity, localised bait movements, temperature gradients, and plain luck. Always check current NSW DPI regulations before fishing. Bag limits and size restrictions change. Never rely solely on this tool for navigational or safety decisions on the water.
+      </div>
+    </div>
+
+    <div style="text-align:center;font-family:'DM Mono',monospace;font-size:10px;color:var(--dim);letter-spacing:2px;padding-bottom:20px;">
+      TIDE RUNNER // Built for Peakhurst, Sydney // Running on stell-workstation
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
