@@ -259,6 +259,14 @@ nav {
   margin-bottom:4px;
 }
 
+/* Card height consistency */
+.grid-4 .card { display:flex; flex-direction:column; }
+.grid-4 .card .card-body { flex:1; display:flex; flex-direction:column; justify-content:center; }
+.score-ring-wrap, .tide-gauge-wrap, .next-tide-box { flex:1; }
+.tide-gauge-wrap { justify-content:center; }
+.next-tide-box { display:flex; flex-direction:column; align-items:center; justify-content:center; }
+
+
 .stat-sub {
   font-family:'DM Mono',monospace;
   font-size:10px;
@@ -1486,17 +1494,24 @@ function renderNow(d) {
       <span class="cond-value">${w.rain_chance||0}%</span>
       <span class="cond-badge ${(w.rain_chance||0)>50?'badge-bad':'badge-good'}">${(w.rain_chance||0)>50?'LIKELY':'LOW'}</span>
     </div>
+    ${m.water_temp ? `
+    <div class="cond-item">
+      <span class="cond-label">Water Temp</span>
+      <span class="cond-value">${m.water_temp}°C</span>
+      <span class="cond-badge ${m.water_temp>=18&&m.water_temp<=24?'badge-good':m.water_temp>24?'badge-warn':'badge-info'}">${m.water_temp>=18&&m.water_temp<=24?'IDEAL':m.water_temp>24?'WARM':'COOL'}</span>
+    </div>` : ''}
   `;
 
   // Biting now
   if (d.biting && d.biting.length) {
     document.getElementById('biting-badge').textContent = d.biting.length + ' ACTIVE';
     document.getElementById('biting-body').innerHTML = d.biting.map(b=>`
-      <div class="biting-item">
-        <div class="biting-emoji">${b.emoji}</div>
-        <div>
+      <div class="biting-item" style="align-items:flex-start;">
+        <div class="biting-emoji" style="margin-top:4px;">${b.emoji}</div>
+        <div style="flex:1;">
           <div class="biting-name" style="color:${b.color}">${b.name}</div>
           <div class="biting-tip">${b.tip}</div>
+          ${b.reasons&&b.reasons.length?`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;">${b.reasons.map(r=>`<span style="font-family:'DM Mono',monospace;font-size:9px;padding:2px 7px;border-radius:4px;background:rgba(0,255,200,0.08);color:var(--teal);border:1px solid rgba(0,255,200,0.2);">${r}</span>`).join('')}</div>`:''}
         </div>
         <div class="biting-score">
           <div class="biting-score-num" style="color:${scoreColor(b.score)}">${b.score}</div>
@@ -1957,16 +1972,17 @@ setInterval(loadConditions, 60000); // refresh every minute
       <div class="card-header"><div class="card-title">🎯 Fishing Score Algorithm</div><div class="card-badge">0–100</div></div>
       <div class="card-body">
         <div style="font-size:13px;color:var(--text);margin-bottom:16px;line-height:1.6;">
-          The overall fishing score is a weighted composite of 6 independent variables. Each factor is scored 0–100 then multiplied by its weight.
+          The overall fishing score is a weighted composite of 7 independent variables. Each factor is scored 0–100 then multiplied by its weight.
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
           ${[
-            ['Time of Day','25%','Dawn (04–08h) & dusk (16–20h) = 100. Midday (10–14h) = 25. Night = 60. Based on fish feeding behaviour driven by light levels and baitfish movement.'],
+            ['Time of Day','20%','Dawn (04–08h) & dusk (16–20h) = 100. Midday (10–14h) = 30. Night = 65. Based on fish feeding behaviour driven by light levels and baitfish movement.'],
             ['Moon Phase','20%','New moon & full moon = 95–100 (gravitational tidal forces peak). Quarter moons = 70. Mid-cycle = 50. Uses precise astronomical algorithm.'],
-            ['Barometric Pressure','20%','Rising pressure = 85 (fish feed aggressively before fronts). Stable = 70. Falling = 40 (fish go deep and stop feeding). Derived from 3hr pressure trend.'],
-            ['Wind Speed','15%','Under 10 km/h = 100. 10–20 = 75. 20–30 = 45. Over 30 = 20. Light winds mean better visibility, less surface disturbance, easier casting.'],
-            ['Tidal Range','15%','Calculated as HIGH tide height minus LOW tide height from WorldTides data. Bigger range = more water movement = more bait and predator activity.'],
-            ['Swell Height','5%','Under 0.5m = 90. 0.5–1m = 75. 1–1.5m = 55. Over 1.5m = 30. From Open-Meteo marine API. Affects estuary conditions less than coastal.'],
+            ['Barometric Pressure','20%','Rising pressure = 90 (fish feed aggressively before fronts). Stable = 70. Falling = 40 (fish go deep and stop feeding). Derived from 3hr pressure trend.'],
+            ['Wind Speed','15%','Under 10 km/h = 100. 10–20 = 75. 20–30 = 45. Over 30 = 15. Light winds mean better visibility, less surface disturbance, easier casting.'],
+            ['Tidal Range','15%','Calculated as HIGH tide height minus LOW tide height from WorldTides data. Sweet spot 0.8–1.8m = 100. Bigger range = more water movement = more bait and predator activity.'],
+            ['Water Temperature','10%','Sea surface temperature from Open-Meteo Marine API. 18–24°C = ideal for most Sydney species (scores 100). 24–27°C = warm, Kingfish and Whiting love it (80). 15–18°C = cool, Bream and Flathead still ok (65). Under 15°C = most species sluggish (35).'],
+            ['Swell Height','5%','Under 0.5m = 95. 0.5–1m = 75. 1–1.5m = 50. Over 1.5m = 25. Lower weight because most Sydney estuary spots are sheltered from ocean swell.'],
           ].map(([name, weight, desc]) => `
             <div style="padding:14px;background:rgba(0,0,0,0.3);border-radius:8px;border:1px solid var(--border);">
               <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
@@ -1977,8 +1993,52 @@ setInterval(loadConditions, 60000); // refresh every minute
             </div>
           `).join('')}
         </div>
-        <div style="padding:14px;background:rgba(0,212,255,0.05);border-radius:8px;border:1px solid var(--border2);font-family:'DM Mono',monospace;font-size:12px;color:var(--text);">
-          <span style="color:var(--cyan);">FORMULA:</span> Score = (time×0.25) + (moon×0.20) + (pressure×0.20) + (wind×0.15) + (tide_range×0.15) + (swell×0.05)
+        <div style="padding:14px;background:rgba(0,212,255,0.05);border-radius:8px;border:1px solid var(--border2);font-family:'DM Mono',monospace;font-size:12px;color:var(--text);margin-bottom:10px;">
+          <span style="color:var(--cyan);">FORMULA:</span> Score = (time×0.20) + (moon×0.20) + (pressure×0.20) + (wind×0.15) + (tide×0.15) + (temp×0.10) + (swell×0.05)
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;">
+          ${[
+            ['PRIME','≥ 85','var(--teal)','rgba(0,255,200,0.08)','rgba(0,255,200,0.2)'],
+            ['GREAT','≥ 70','#00aaff','rgba(0,170,255,0.08)','rgba(0,170,255,0.2)'],
+            ['GOOD','≥ 55','var(--gold)','rgba(255,208,96,0.08)','rgba(255,208,96,0.2)'],
+            ['AVERAGE','≥ 40','var(--coral)','rgba(255,107,107,0.08)','rgba(255,107,107,0.2)'],
+            ['POOR','< 40','#888','rgba(100,100,100,0.08)','rgba(100,100,100,0.2)'],
+          ].map(([label,range,color,bg,border])=>`
+            <div style="padding:10px;text-align:center;background:${bg};border-radius:8px;border:1px solid ${border};">
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:${color};">${label}</div>
+              <div style="font-family:'DM Mono',monospace;font-size:11px;color:${color};margin-top:2px;">${range}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+
+    <!-- What's Biting -->
+    <div class="card" style="margin-bottom:14px;">
+      <div class="card-header"><div class="card-title">🐟 What's Biting — Species Scoring</div><div class="card-badge">0–100 pts</div></div>
+      <div class="card-body">
+        <div style="font-size:13px;color:var(--text);margin-bottom:16px;line-height:1.6;">
+          Each species is scored independently against current conditions using 5 factors. The result drives the "What's Biting" panel on the NOW page, showing which species are most active right now along with the specific reasons driving the score.
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+          ${[
+            ['Season','35 pts','Full points in peak season for that species. Reduced in off-peak months. Based on spawning cycles and baitfish availability in Sydney waters.'],
+            ['Moon Phase','25 pts','Species respond differently — Jewfish favour dark new moon nights, Kingfish respond to full moon tidal surges. Scored per-species from the astronomical moon phase calculation.'],
+            ['Wind Speed','15 pts','Calm winds (under 10 km/h) = full points. Moderate to strong wind reduces score. Light winds improve surface visibility and allow longer casts to holding structure.'],
+            ['Time of Day','15 pts','Dawn and dusk feeding windows score highest. Midday scores lowest. Matched against current time in Sydney (AEST/AEDT).'],
+            ['Water Temperature','10 pts','Sea surface temperature from Open-Meteo Marine API matched against each species' preferred temp range. E.g. Whiting prefer 20–26°C, Jewfish prefer 16–22°C.'],
+          ].map(([name, pts, desc]) => `
+            <div style="padding:14px;background:rgba(0,0,0,0.3);border-radius:8px;border:1px solid var(--border);">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                <div style="font-weight:600;color:var(--bright);font-size:14px;">${name}</div>
+                <div style="font-family:'DM Mono',monospace;font-size:13px;color:var(--teal);font-weight:700;">${pts}</div>
+              </div>
+              <div style="font-size:12px;color:var(--dim);line-height:1.5;">${desc}</div>
+            </div>
+          `).join('')}
+        </div>
+        <div style="padding:12px 14px;background:rgba(0,255,200,0.04);border-radius:8px;border:1px solid rgba(0,255,200,0.15);font-size:12px;color:var(--dim);line-height:1.6;">
+          <strong style="color:var(--teal);">Transparency:</strong> Every score comes with a <span style="color:var(--teal);">reasons[]</span> array (e.g. "In peak season", "Moon phase favourable", "Calm wind") and a <span style="color:var(--coral);">penalties[]</span> array explaining what's working against each species. These are shown as green tags on the NOW page.
         </div>
       </div>
     </div>
@@ -2042,7 +2102,7 @@ setInterval(loadConditions, 60000); // refresh every minute
             ['🌙 Moon Phase','Local Calculation','Astronomical algorithm based on known new moon epoch (Jan 6, 2000 18:14 UTC). Synodic cycle = 29.53058867 days. Accurate to within minutes. Zero API calls.','Built-in'],
             ['📅 Solunar Times','Local Calculation','Derived from moon phase position. Major periods = moon transit (overhead/underfoot). Minor = 90° offset. Calculated fresh for each day, zero API calls.','Built-in'],
             ['🌅 Sunrise/Sunset','Open-Meteo','Daily sunrise and sunset times for Peakhurst coordinates. Fetched with weather data, no additional cost.','open-meteo.com'],
-            ['📝 Catch Log','Local SQLite','Your catch data is stored in ~/.openclaw/cache/catches.json on your machine. Never leaves your computer. No cloud sync.','Local only'],
+            ['📝 Catch Log','Local SQLite','Your catch data is stored locally on your machine in JSON format. Never leaves your computer. No cloud sync, no account required.','Local only'],
           ].map(([icon, name, desc, source]) => `
             <div style="padding:14px;background:rgba(0,0,0,0.2);border-radius:8px;border:1px solid var(--border);">
               <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
