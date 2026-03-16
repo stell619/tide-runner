@@ -10,7 +10,7 @@
 ## ✨ Features
 
 ### 🏠 Live Conditions Dashboard
-Real-time fishing score (0–100) calculated from 7 weighted factors: tidal range, moon phase, barometric pressure, wind speed, sea surface temperature, swell height, and time of day. Animated score ring with live factor breakdown, live tide height interpolation, next tide countdown, and species activity analysis.
+Real-time fishing score (0–100) calculated from 10 weighted factors: tidal range, tidal direction, moon phase, barometric pressure trend, wind speed, sea surface temperature, temperature trend, swell height, front proximity, and time of day. Animated score ring with live factor breakdown, live tide height interpolation, next tide countdown, and species activity analysis.
 
 ### 📅 7-Day Forecast
 Interactive day-by-day fishing forecast with clickable tabs, real tide graphs with current-time marker, solunar overlay, weather breakdown, and best fishing windows per day.
@@ -28,10 +28,10 @@ Interactive day-by-day fishing forecast with clickable tabs, real tide graphs wi
 Personal catch database with species, location, size, and weight. Persistent JSON storage. Stats dashboard showing total catches, species count, and personal bests.
 
 ### 📊 Score Breakdown
-Live per-factor breakdown card showing each of the 7 scoring variables and their individual contributions to the total score — no black boxes.
+Live per-factor breakdown card showing each of the 10 scoring variables and their individual contributions to the total score — no black boxes.
 
 ### ℹ️ Methodology
-Full transparency page explaining exactly how every score, calculation, and recommendation is derived — including the 7-factor weighted formula, What's Biting species scoring, data sources, and solunar theory.
+Full transparency page explaining exactly how every score, calculation, and recommendation is derived — including the 10-factor weighted formula, What's Biting species scoring, data sources, and solunar theory.
 
 ---
 
@@ -195,25 +195,33 @@ Tide Runner is pre-configured for **Sydney, Australia** with spots across:
 
 ## 🧮 Fishing Score Algorithm
 
-The overall score (0–100) is a weighted composite of 7 factors:
+The overall score (0–100) is a weighted composite of 10 factors, rebalanced based on peer-reviewed fisheries research:
 
 ```
-Score = (time×0.20) + (moon×0.20) + (pressure×0.20) +
-        (wind×0.15) + (tide×0.15) + (temp×0.10) +
-        (swell×0.05)
+Score = (time×0.20) + (moon×0.10) + (pressure×0.10) +
+        (wind×0.18) + (tide_range×0.10) +
+        (tide_direction×0.08) + (temp_abs×0.12) +
+        (temp_trend×0.05) + (swell×0.03) + (front×0.04)
 ```
 
-| Factor | Weight | Best Conditions |
-|--------|--------|----------------|
-| Time of day | 20% | Dawn (04–08h) & dusk (16–20h) |
-| Moon phase | 20% | New moon & full moon |
-| Barometric pressure | 20% | Rising pressure |
-| Wind speed | 15% | Under 10 km/h |
-| Tidal range | 15% | Sweet spot 0.8–1.8m range |
-| Sea surface temp | 10% | 18–24°C ideal for Sydney species |
-| Swell height | 5% | Under 0.5m |
+Plus rain and cloud modifiers applied after the weighted sum.
 
-Scores translate to: **PRIME** ≥85 · **GREAT** ≥70 · **GOOD** ≥55 · **AVERAGE** ≥40 · **POOR** <40
+| Factor | Weight | Key finding |
+|--------|--------|-------------|
+| Time of day | 20% | Dawn/dusk — ★★★★★ strongest predictor |
+| Moon phase | 10% | Reduced — weak for estuarine species (Quigley 2023) |
+| Pressure trend | 10% | Reduced — direct effect unproven (Ross/WHOI) |
+| Wind speed | 18% | Increased — stronger predictor than pressure |
+| Tidal range | 10% | Sweet spot 0.8–1.8m |
+| Tidal direction | 8% | NEW — incoming vs outgoing |
+| Sea surface temp | 12% | Increased — primary driver (Stoner 2004) |
+| Temp trend | 5% | NEW — direction of change matters |
+| Swell height | 3% | Reduced — minor for estuaries |
+| Front proximity | 4% | NEW — pre-frontal feeding spike |
+
+Scores: **PRIME** ≥90 · **GREAT** ≥78 · **GOOD** ≥62 · **AVERAGE** ≥45 · **POOR** <45
+
+> 📄 See [ALGORITHM.md](ALGORITHM.md) for full scientific basis with 15+ peer-reviewed citations.
 
 ---
 
@@ -224,8 +232,10 @@ tide-runner/
 ├── server.py          # Python HTTP server + all API endpoints
 ├── index.html         # Full frontend (single file — no build step)
 ├── fetch_tides.py     # WorldTides API fetcher (run twice weekly)
+├── ALGORITHM.md       # Scoring algorithm scientific methodology
 ├── tide-runner.service # systemd service file
 ├── .env.example       # Environment variable template
+├── cache/             # Tide data cache (auto-created)
 ├── screenshots/       # README screenshots
 └── README.md
 ```
@@ -323,4 +333,4 @@ Tide Runner provides fishing intelligence based on environmental data and establ
 
 ---
 
-*Built in Sydney, Australia 🦘 | Self-hosted, open source, free forever | v2.0*
+*Built in Sydney, Australia 🦘 | Self-hosted, open source, free forever | v2.1*
