@@ -255,6 +255,28 @@ Pull requests for other Australian cities are very welcome!
 
 ---
 
+## 🗺️ Roadmap
+
+### 🚧 In Progress
+- ⚙️ Continue updating page layouts
+- 📱 Mobile responsive layout
+
+### 📋 Planned
+- 🗺️ Expand locations beyond Sydney
+- 📍 User-configurable fishing spots
+- 🔔 Tide alerts via push notification
+- 📈 Historical catch data charts
+- 🏆 Species size/weight tracker with PB records
+- 🌧️ Weather radar integration
+- 📶 Offline mode — full PWA support
+
+### 💭 Considering
+- 🌐 Hosting a public version
+- 📲 iOS/Android app wrapper
+- 👥 Community spot submissions
+
+---
+
 ## 🤝 Contributing
 
 Contributions welcome! Especially:
