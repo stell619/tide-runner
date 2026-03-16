@@ -269,6 +269,7 @@ Pull requests for other Australian cities are very welcome!
 - 🏆 Species size/weight tracker with PB records
 - 🌧️ Weather radar integration
 - 📶 Offline mode — full PWA support
+- 🪟 Windows support
 
 ### 💭 Considering
 - 🌐 Hosting a public version
