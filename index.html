@@ -188,7 +188,8 @@ nav {
 .card:hover { border-color: var(--border2); }
 
 .card-header {
-  padding:14px 18px;
+  padding:0 18px;
+  min-height:44px;
   border-bottom:1px solid var(--border);
   display:flex;
   align-items:center;
@@ -219,8 +220,8 @@ nav {
 /* ── GRIDS ── */
 .grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:14px; }
 .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:14px; }
-.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; }
-.grid-auto { display:grid; grid-template-columns:2fr 1fr; gap:14px; margin-bottom:14px; }
+.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; align-items:stretch; }
+.grid-auto { display:grid; grid-template-columns:2fr 1fr; gap:14px; margin-bottom:14px; align-items:stretch; }
 .grid-3-1 { display:grid; grid-template-columns:3fr 1fr; gap:14px; margin-bottom:14px; }
 
 /* ── STAT BOXES ── */
@@ -352,10 +353,10 @@ nav {
 
 /* ── CONDITIONS ROW ── */
 .cond-item {
-  display:flex;
+  display:grid;
+  grid-template-columns:140px 1fr auto;
   align-items:center;
-  justify-content:space-between;
-  padding:10px 0;
+  padding:12px 0;
   border-bottom:1px solid var(--border);
 }
 .cond-item:last-child { border-bottom:none; }
@@ -373,6 +374,7 @@ nav {
   font-size:14px;
   font-weight:600;
   color:var(--bright);
+  text-align:left;
 }
 
 .cond-badge {
@@ -381,6 +383,8 @@ nav {
   padding:2px 8px;
   border-radius:4px;
   letter-spacing:1px;
+  line-height:1.4;
+  flex-shrink:0;
 }
 
 .badge-good  { background:rgba(0,255,200,0.1); color:var(--teal); border:1px solid rgba(0,255,200,0.2); }
@@ -1140,8 +1144,8 @@ canvas.tide-chart {
     </div>
   </div>
 
-  <!-- Row 2: Conditions + Biting Now -->
-  <div class="grid-auto" style="margin-bottom:14px;">
+  <!-- Row 2: Conditions + Biting Now + Score Breakdown -->
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px;">
 
     <div class="card">
       <div class="card-header"><div class="card-title">Conditions</div></div>
@@ -1157,21 +1161,27 @@ canvas.tide-chart {
       </div>
     </div>
 
+    <div class="card" style="display:flex;flex-direction:column;">
+      <div class="card-header"><div class="card-title">Score Breakdown</div><div class="card-badge" id="breakdown-score-badge">--</div></div>
+      <div class="card-body" id="breakdown-body" style="flex:1;display:flex;flex-direction:column;">
+        <div class="loading">Loading</div>
+      </div>
+    </div>
+
   </div>
 
   <!-- Row 3: Today's Tides + Solunar -->
   <div class="grid-2">
-    <div class="card">
+    <div class="card" style="display:flex;flex-direction:column;">
       <div class="card-header"><div class="card-title">Today's Tides — Port Hacking</div></div>
-      <div class="card-body">
-        <canvas class="tide-chart" id="today-chart" width="600" height="100"></canvas>
-        <div style="margin-top:12px;" id="tide-table-today"></div>
+      <div class="card-body" style="flex:1;display:flex;flex-direction:column;">
+        <div style="display:flex;flex-direction:column;justify-content:space-evenly;flex:1;" id="tide-table-today"></div>
       </div>
     </div>
 
-    <div class="card">
+    <div class="card" style="display:flex;flex-direction:column;">
       <div class="card-header"><div class="card-title">Solunar Feeding Times</div><div class="card-badge">today</div></div>
-      <div class="card-body" id="solunar-today">
+      <div class="card-body" style="flex:1;display:flex;flex-direction:column;" id="solunar-today">
         <div class="loading">Calculating</div>
       </div>
     </div>
@@ -1435,14 +1445,37 @@ function renderNow(d) {
   document.getElementById('sunrise-time').textContent = d.weather.sunrise||'--:--';
   document.getElementById('sunset-time').textContent  = d.weather.sunset||'--:--';
 
-  // Tide gauge
+  // Tide gauge — interpolate current height between nearest extremes
   if (d.tides && d.tides.length >= 2) {
-    const heights = d.tides.map(t=>t.height);
-    const maxH = Math.max(...heights);
-    const minH = Math.min(...heights);
-    // Estimate current height from nearest extremes
-    const pct = 50; // simplified
-    document.getElementById('tide-fill').style.height = pct+'%';
+    const allH = d.tides.map(t=>t.height);
+    const maxH = Math.max(...allH);
+    const minH = Math.min(...allH);
+
+    const now = new Date();
+    const nowMins = now.getHours()*60 + now.getMinutes();
+
+    // Convert tide times ("07:50") to minutes
+    const tidesMins = d.tides.map(t => {
+      const [h,m] = t.time.split(':').map(Number);
+      return { mins: h*60+m, height: t.height };
+    });
+
+    const prev = [...tidesMins].reverse().find(t => t.mins <= nowMins);
+    const next = tidesMins.find(t => t.mins > nowMins);
+
+    let curHeight;
+    if (prev && next) {
+      const progress = (nowMins - prev.mins) / (next.mins - prev.mins);
+      curHeight = prev.height + (next.height - prev.height) * (1 - Math.cos(progress * Math.PI)) / 2;
+    } else if (prev) {
+      curHeight = prev.height;
+    } else {
+      curHeight = next ? next.height : (maxH + minH) / 2;
+    }
+
+    const pct = ((curHeight - minH) / (maxH - minH)) * 100;
+    document.getElementById('tide-fill').style.height = Math.max(5, Math.min(95, pct))+'%';
+    document.getElementById('tide-height-label').textContent = curHeight.toFixed(2)+'m';
   }
 
   // Next tide
@@ -1506,12 +1539,11 @@ function renderNow(d) {
   if (d.biting && d.biting.length) {
     document.getElementById('biting-badge').textContent = d.biting.length + ' ACTIVE';
     document.getElementById('biting-body').innerHTML = d.biting.map(b=>`
-      <div class="biting-item" style="align-items:flex-start;">
-        <div class="biting-emoji" style="margin-top:4px;">${b.emoji}</div>
-        <div style="flex:1;">
+      <div class="biting-item">
+        <div class="biting-emoji">${b.emoji}</div>
+        <div>
           <div class="biting-name" style="color:${b.color}">${b.name}</div>
           <div class="biting-tip">${b.tip}</div>
-          ${b.reasons&&b.reasons.length?`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;">${b.reasons.map(r=>`<span style="font-family:'DM Mono',monospace;font-size:9px;padding:2px 7px;border-radius:4px;background:rgba(0,255,200,0.08);color:var(--teal);border:1px solid rgba(0,255,200,0.2);">${r}</span>`).join('')}</div>`:''}
         </div>
         <div class="biting-score">
           <div class="biting-score-num" style="color:${scoreColor(b.score)}">${b.score}</div>
@@ -1521,15 +1553,52 @@ function renderNow(d) {
     `).join('');
   }
 
+  // Score breakdown
+  if (d.score && d.score.breakdown) {
+    document.getElementById('breakdown-score-badge').textContent = d.score.score;
+    const factors = [
+      ['Time of Day', 'time',     20],
+      ['Moon Phase',  'moon',     20],
+      ['Pressure',    'pressure', 20],
+      ['Wind',        'wind',     15],
+      ['Tide Range',  'tide',     15],
+      ['Water Temp',  'temp',     10],
+      ['Swell',       'swell',     5],
+    ];
+    const bd = d.score.breakdown;
+    document.getElementById('breakdown-body').innerHTML =
+      `<div style="display:flex;flex-direction:column;flex:1;justify-content:space-evenly;">` +
+      factors.map(([label, key, max]) => {
+        const val = bd[key] || 0;
+        const pct = (val / max) * 100;
+        return `
+          <div style="display:grid;grid-template-columns:90px 1fr 50px;align-items:center;gap:8px;padding:4px 0;">
+            <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--dim);text-transform:uppercase;">${label}</div>
+            <div style="height:4px;background:rgba(0,0,0,0.4);border-radius:2px;overflow:hidden;">
+              <div style="height:100%;border-radius:2px;background:linear-gradient(90deg,var(--cyan),var(--teal));width:${pct}%;transition:width 1s ease;"></div>
+            </div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--cyan);text-align:right;">${val}/${max}</div>
+          </div>`;
+      }).join('') +
+      `</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding-top:8px;padding-bottom:8px;margin-top:4px;border-top:1px solid var(--border2);">
+        <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--dim);">TOTAL SCORE</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--teal);">${d.score.score}</div>
+      </div>`;
+  }
+
   // Tide table
   if (d.tides && d.tides.length) {
+    const maxTideH = Math.max(...d.tides.map(t=>t.height));
     document.getElementById('tide-table-today').innerHTML = d.tides.map(t=>`
-      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);">
-        <span style="color:${t.type==='HIGH'?'var(--cyan)':'var(--dim)'};font-weight:600;font-size:13px;">
-          ${t.type==='HIGH'?'▲':'▼'} ${t.type}
-        </span>
-        <span style="font-family:'DM Mono',monospace;font-size:14px;color:var(--bright);">${t.time}</span>
-        <span style="font-family:'DM Mono',monospace;font-size:13px;color:var(--dim);">${t.height}m</span>
+      <div class="solunar-row">
+        <div class="solunar-time">${t.time}</div>
+        <div class="solunar-type" style="color:${t.type==='HIGH'?'var(--cyan)':'var(--dim)'}">${t.type}</div>
+        <div class="solunar-bar">
+          <div style="height:100%;border-radius:3px;width:${Math.round((t.height/maxTideH)*100)}%;
+            background:${t.type==='HIGH'?'linear-gradient(90deg,var(--cyan),var(--teal))':'linear-gradient(90deg,var(--dim),#2a4a6a)'};"></div>
+        </div>
+        <div class="cond-badge badge-info">${t.height}m</div>
       </div>
     `).join('');
   }
@@ -1539,7 +1608,8 @@ function renderNow(d) {
     const all = [...d.solunar.major.map(s=>({...s,type:'major'})),
                  ...d.solunar.minor.map(s=>({...s,type:'minor'}))];
     all.sort((a,b)=>a.time.localeCompare(b.time));
-    document.getElementById('solunar-today').innerHTML = all.map(s=>`
+    document.getElementById('solunar-today').innerHTML = `<div style="display:flex;flex-direction:column;justify-content:space-evenly;flex:1;">` +
+      all.map(s=>`
       <div class="solunar-row">
         <div class="solunar-time">${s.time}</div>
         <div class="solunar-type" style="color:${s.type==='major'?'var(--gold)':'var(--cyan)'}">${s.label}</div>
@@ -1548,13 +1618,8 @@ function renderNow(d) {
         </div>
         <div class="cond-badge ${s.type==='major'?'badge-warn':'badge-info'}">${s.duration}</div>
       </div>
-    `).join('');
+    `).join('') + `</div>`;;
   }
-
-  // Draw tide chart (delayed to ensure canvas is visible)
-  setTimeout(() => {
-    if (d.tides_heights) drawTideChart(d.tides_heights, 'today-chart', true);
-  }, 100);
 }
 
 // ── LOAD: FORECAST ────────────────────────────────────────
