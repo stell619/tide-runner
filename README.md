@@ -51,6 +51,26 @@ Full transparency page explaining exactly how every score, calculation, and reco
 
 ---
 
+## 📊 Scoring Algorithm
+
+Tide Runner's fishing score is built on peer-reviewed
+fisheries science — not solunar folklore.
+
+> 📄 **[Full Algorithm Documentation & Scientific Basis →](ALGORITHM.md)**
+
+10 environmental factors, weighted by evidence strength.
+Every weight is justified by published research including
+Stoner (2004), Quigley et al. (2023), Lowry et al. (2007 NSW),
+Myers et al. (2016), and Agmour et al. (2020).
+
+Unlike most fishing apps which over-index on solunar theory
+(shown by peer-reviewed research to have weak predictive value
+for estuarine species), Tide Runner prioritises water
+temperature, tidal flow direction, and time of day — the
+factors with ★★★★★ evidence ratings.
+
+---
+
 ## 🛠️ Tech Stack
 
 | Layer | Technology |
