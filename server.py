@@ -758,7 +758,7 @@ if __name__ == "__main__":
     server = HTTPServer((HOST, PORT), Handler)
     print(f"🎣 TIDE RUNNER running at http://0.0.0.0:{PORT}")
     print(f"   Local:     http://localhost:{PORT}")
-    print(f"   Tailscale: http://100.123.216.110:{PORT}")
+    print(f"   Tailscale: http://YOUR_TAILSCALE_IP:{PORT}")
     try:
         server.serve_forever()
     except KeyboardInterrupt:
