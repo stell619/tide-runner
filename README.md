@@ -10,7 +10,7 @@
 ## ✨ Features
 
 ### 🏠 Live Conditions Dashboard
-Real-time fishing score (0–100) calculated from tidal range, moon phase, barometric pressure, wind speed, swell height, and time of day. Animated score ring, live tide gauge, next tide countdown, and species activity analysis.
+Real-time fishing score (0–100) calculated from 7 weighted factors: tidal range, moon phase, barometric pressure, wind speed, sea surface temperature, swell height, and time of day. Animated score ring with live factor breakdown, live tide height interpolation, next tide countdown, and species activity analysis.
 
 ### 📅 7-Day Forecast
 Interactive day-by-day fishing forecast with clickable tabs, real tide graphs with current-time marker, solunar overlay, weather breakdown, and best fishing windows per day.
@@ -27,8 +27,11 @@ Interactive day-by-day fishing forecast with clickable tabs, real tide graphs wi
 ### 📓 Catch Log
 Personal catch database with species, location, size, and weight. Persistent JSON storage. Stats dashboard showing total catches, species count, and personal bests.
 
+### 📊 Score Breakdown
+Live per-factor breakdown card showing each of the 7 scoring variables and their individual contributions to the total score — no black boxes.
+
 ### ℹ️ Methodology
-Full transparency page explaining exactly how every score, calculation, and recommendation is derived — including the weighted formula, data sources, and solunar theory.
+Full transparency page explaining exactly how every score, calculation, and recommendation is derived — including the 7-factor weighted formula, What's Biting species scoring, data sources, and solunar theory.
 
 ---
 
@@ -56,6 +59,7 @@ Full transparency page explaining exactly how every score, calculation, and reco
 | **Backend** | Python 3.12 — standard library HTTP server |
 | **Tide Data** | [WorldTides API](https://www.worldtides.info) — fetched twice weekly, cached locally |
 | **Weather/Swell** | [Open-Meteo](https://open-meteo.com) — free, no API key required |
+| **Sea Surface Temp** | [Open-Meteo Marine API](https://open-meteo.com) — free, no API key required |
 | **Moon Phase** | Local astronomical algorithm (synodic cycle calculation) |
 | **Solunar Times** | Local calculation (John Alden Knight method) |
 | **Catch Storage** | Local JSON file — your data never leaves your machine |
@@ -171,22 +175,25 @@ Tide Runner is pre-configured for **Sydney, Australia** with spots across:
 
 ## 🧮 Fishing Score Algorithm
 
-The overall score (0–100) is a weighted composite:
+The overall score (0–100) is a weighted composite of 7 factors:
 
 ```
-Score = (time_of_day × 0.25) + (moon_phase × 0.20) + 
-        (pressure_trend × 0.20) + (wind_speed × 0.15) + 
-        (tidal_range × 0.15) + (swell_height × 0.05)
+Score = (time×0.20) + (moon×0.20) + (pressure×0.20) +
+        (wind×0.15) + (tide×0.15) + (temp×0.10) +
+        (swell×0.05)
 ```
 
 | Factor | Weight | Best Conditions |
 |--------|--------|----------------|
-| Time of day | 25% | Dawn (04–08h) & dusk (16–20h) |
+| Time of day | 20% | Dawn (04–08h) & dusk (16–20h) |
 | Moon phase | 20% | New moon & full moon |
 | Barometric pressure | 20% | Rising pressure |
 | Wind speed | 15% | Under 10 km/h |
-| Tidal range | 15% | Large range = more water movement |
+| Tidal range | 15% | Sweet spot 0.8–1.8m range |
+| Sea surface temp | 10% | 18–24°C ideal for Sydney species |
 | Swell height | 5% | Under 0.5m |
+
+Scores translate to: **PRIME** ≥85 · **GREAT** ≥70 · **GOOD** ≥55 · **AVERAGE** ≥40 · **POOR** <40
 
 ---
 
@@ -273,4 +280,4 @@ Tide Runner provides fishing intelligence based on environmental data and establ
 
 ---
 
-*Built in Sydney, Australia 🦘 | Self-hosted, open source, free forever*
+*Built in Sydney, Australia 🦘 | Self-hosted, open source, free forever | v2.0*
